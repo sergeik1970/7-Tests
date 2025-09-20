@@ -1,0 +1,310 @@
+.hero {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    color: white;
+    padding: 80px 0 80px;
+    position: relative;
+    overflow: hidden;
+
+    &::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="25" cy="25" r="1" fill="rgba(255,255,255,0.1)"/><circle cx="75" cy="75" r="1" fill="rgba(255,255,255,0.1)"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
+        opacity: 0.3;
+    }
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 60px;
+    align-items: center;
+    position: relative;
+    z-index: 1;
+}
+
+.content {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+.title {
+    font-size: 48px;
+    font-weight: 700;
+    line-height: 1.2;
+    margin: 0;
+}
+
+.highlight {
+    color: #6ee7b7;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.subtitle {
+    font-size: 18px;
+    line-height: 1.6;
+    opacity: 0.9;
+    margin: 0;
+}
+
+.actions {
+    display: flex;
+    gap: 20px;
+    margin-top: 24px;
+
+    a {
+        display: inline-block;
+        transform: scale(1);
+        transition: transform 0.2s ease;
+
+        &:hover {
+            transform: scale(1.05);
+        }
+
+        button {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            font-weight: 600;
+            padding: 0 32px;
+            height: 52px;
+            font-size: 18px;
+
+            &:hover {
+                box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+            }
+        }
+
+        // Специальные стили для outline кнопки на зеленом фоне
+        &:last-child button {
+            background-color: rgba(255, 255, 255, 0.1);
+            border-color: rgba(255, 255, 255, 0.8);
+            color: white;
+            backdrop-filter: blur(10px);
+
+            &:hover {
+                background-color: rgba(255, 255, 255, 0.2);
+                border-color: white;
+            }
+        }
+    }
+}
+
+
+
+.illustration {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.mockup {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+    width: 400px;
+    overflow: hidden;
+    transform: rotate(5deg);
+    transition: transform 0.3s ease;
+
+    &:hover {
+        transform: rotate(0deg) scale(1.05);
+    }
+}
+
+.mockupHeader {
+    background: #f3f4f6;
+    padding: 12px 16px;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.mockupDots {
+    display: flex;
+    gap: 6px;
+
+    span {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: #d1d5db;
+
+        &:first-child {
+            background: #ef4444;
+        }
+
+        &:nth-child(2) {
+            background: #f59e0b;
+        }
+
+        &:nth-child(3) {
+            background: #10b981;
+        }
+    }
+}
+
+.mockupContent {
+    padding: 24px;
+    color: #374151;
+}
+
+.mockupTitle {
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 20px;
+    color: #1f2937;
+}
+
+.mockupQuestion {
+    position: relative;
+}
+
+.questionText {
+    font-size: 16px;
+    margin-bottom: 16px;
+    color: #374151;
+}
+
+.options {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.option {
+    padding: 8px 12px;
+    border: 2px solid #e5e7eb;
+    border-radius: 6px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+
+    &:hover:not(.disabled):not(.correct):not(.incorrect) {
+        border-color: #d1d5db;
+        background: #f9fafb;
+        transform: translateY(-1px);
+    }
+
+    &.correct {
+        border-color: #10b981;
+        background: #ecfdf5;
+        color: #065f46;
+        animation: correctPulse 0.6s ease-out;
+        cursor: default;
+    }
+
+    &.incorrect {
+        border-color: #ef4444;
+        background: #fef2f2;
+        color: #991b1b;
+        animation: incorrectShake 0.6s ease-out;
+        cursor: default;
+    }
+
+    &.disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+        background: #f9fafb;
+    }
+}
+
+.congratsAnimation {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: linear-gradient(135deg, #10b981, #059669);
+    color: white;
+    padding: 16px 24px;
+    border-radius: 12px;
+    font-size: 18px;
+    font-weight: 600;
+    box-shadow: 0 8px 25px rgba(16, 185, 129, 0.4);
+    animation: congratsAppear 0.6s ease-out;
+    z-index: 10;
+}
+
+@keyframes correctPulse {
+    0% {
+        transform: scale(1);
+        box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
+    }
+    50% {
+        transform: scale(1.05);
+        box-shadow: 0 0 0 10px rgba(16, 185, 129, 0);
+    }
+    100% {
+        transform: scale(1);
+        box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
+    }
+}
+
+@keyframes incorrectShake {
+    0%, 100% {
+        transform: translateX(0);
+    }
+    10%, 30%, 50%, 70%, 90% {
+        transform: translateX(-3px);
+    }
+    20%, 40%, 60%, 80% {
+        transform: translateX(3px);
+    }
+}
+
+@keyframes congratsAppear {
+    0% {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(0.5) rotate(-10deg);
+    }
+    50% {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1.1) rotate(5deg);
+    }
+    100% {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1) rotate(0deg);
+    }
+}
+
+
+
+@media (max-width: 768px) {
+    .hero {
+        padding: 60px 0 80px;
+    }
+
+    .container {
+        grid-template-columns: 1fr;
+        gap: 40px;
+        text-align: center;
+    }
+
+    .title {
+        font-size: 36px;
+    }
+
+    .actions {
+        justify-content: center;
+        gap: 16px;
+
+        a button {
+            height: 48px;
+            font-size: 16px;
+            padding: 0 24px;
+        }
+    }
+
+    .mockup {
+        width: 320px;
+        transform: none;
+
+        &:hover {
+            transform: scale(1.02);
+        }
+    }
+}
