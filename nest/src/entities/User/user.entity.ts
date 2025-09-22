@@ -7,7 +7,7 @@ import {
     OneToMany,
 } from "typeorm";
 import { Test } from "../Test/test.entity";
-// import { TestAttempt } from "../TestAttempt/testAttempt.entity";
+import { TestAttempt } from "../TestAttempt/testAttempt.entity";
 
 export enum UserRole {
     PARTICIPANT = "participant",
@@ -45,7 +45,6 @@ export class User {
     @OneToMany(() => Test, (test) => test.creator)
     createdTests: Test[];
 
-    // Временно убираем связь для упрощения
-    // @OneToMany(() => TestAttempt, (attempt) => attempt.user)
-    // testAttempts: TestAttempt[];
+    @OneToMany(() => TestAttempt, (attempt) => attempt.user)
+    testAttempts: TestAttempt[];
 }

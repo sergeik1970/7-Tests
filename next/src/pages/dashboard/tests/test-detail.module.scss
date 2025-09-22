@@ -68,6 +68,16 @@
     flex-wrap: wrap;
 }
 
+.deactivateButton {
+    color: #f59e0b !important;
+    border-color: #f59e0b !important;
+    
+    &:hover {
+        background: #f59e0b !important;
+        color: white !important;
+    }
+}
+
 .deleteButton {
     color: #dc2626 !important;
     border-color: #dc2626 !important;
@@ -75,6 +85,65 @@
     &:hover {
         background: #dc2626 !important;
         color: white !important;
+    }
+}
+
+.studentInfo {
+    margin-top: 30px;
+}
+
+.infoCard {
+    background: white;
+    border: 2px solid #10b981;
+    border-radius: 16px;
+    padding: 32px;
+    text-align: center;
+    box-shadow: 0 4px 6px rgba(16, 185, 129, 0.1);
+    
+    h3 {
+        font-size: 24px;
+        font-weight: 600;
+        margin: 0 0 16px 0;
+        color: #059669;
+    }
+    
+    p {
+        margin: 0 0 12px 0;
+        color: #374151;
+        line-height: 1.6;
+        font-size: 16px;
+        
+        &:last-child {
+            margin-bottom: 0;
+        }
+    }
+}
+
+.startTestSection {
+    margin-top: 24px;
+    padding-top: 20px;
+    border-top: 1px solid #d1fae5;
+}
+
+.startButton {
+    background: #10b981 !important;
+    border-color: #10b981 !important;
+    font-size: 16px !important;
+    font-weight: 600 !important;
+    padding: 12px 32px !important;
+    
+    &:hover {
+        background: #059669 !important;
+        border-color: #059669 !important;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3) !important;
+    }
+    
+    &:disabled {
+        background: #9ca3af !important;
+        border-color: #9ca3af !important;
+        transform: none !important;
+        box-shadow: none !important;
     }
 }
 

@@ -10,7 +10,7 @@ import {
 } from "typeorm";
 import { Test } from "../Test/test.entity";
 import { QuestionOption } from "../QuestionOption/questionOption.entity";
-// import { TestAnswer } from "../TestAnswer/testAnswer.entity";
+import { TestAnswer } from "../TestAnswer/testAnswer.entity";
 
 export enum QuestionType {
     MULTIPLE_CHOICE = "multiple_choice",
@@ -49,9 +49,8 @@ export class Question {
     })
     options: QuestionOption[];
 
-    // Убираем эту связь для упрощения базовой функциональности
-    // @OneToMany(() => TestAnswer, (answer) => answer.question)
-    // answers: TestAnswer[];
+    @OneToMany(() => TestAnswer, (answer) => answer.question)
+    answers: TestAnswer[];
 
     @CreateDateColumn()
     createdAt: Date;

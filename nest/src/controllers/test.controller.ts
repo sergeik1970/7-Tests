@@ -42,7 +42,12 @@ export class TestController {
 
     @Get(":id")
     findOne(@Param("id", ParseIntPipe) id: number, @Request() req) {
-        return this.testService.findOne(id, req.user.id);
+        // Если пользователь - учитель, показываем полную информацию
+        if (req.user.role === UserRole.CREATOR) {
+            return this.testService.findOne(id, req.user.id);
+        }
+        // Если ученик - показываем без правильных ответов
+        return this.testService.findOneForStudent(id);
     }
 
     @Patch(":id")
@@ -61,6 +66,20 @@ export class TestController {
     @Roles(UserRole.CREATOR)
     publish(@Param("id", ParseIntPipe) id: number, @Request() req) {
         return this.testService.publish(id, req.user.id);
+    }
+
+    @Post(":id/deactivate")
+    @UseGuards(RolesGuard)
+    @Roles(UserRole.CREATOR)
+    deactivate(@Param("id", ParseIntPipe) id: number, @Request() req) {
+        return this.testService.deactivate(id, req.user.id);
+    }
+
+    @Get("statistics/overview")
+    @UseGuards(RolesGuard)
+    @Roles(UserRole.CREATOR)
+    getStatistics(@Request() req) {
+        return this.testService.getTeacherStatistics(req.user.id);
     }
 
     @Delete(":id")

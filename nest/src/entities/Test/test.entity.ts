@@ -10,7 +10,7 @@ import {
 } from "typeorm";
 import { User } from "../User/user.entity";
 import { Question } from "../Question/question.entity";
-// import { TestAttempt } from "../TestAttempt/testAttempt.entity";
+import { TestAttempt } from "../TestAttempt/testAttempt.entity";
 
 export enum TestStatus {
     DRAFT = "draft",
@@ -49,9 +49,8 @@ export class Test {
     @OneToMany(() => Question, (question) => question.test, { cascade: true })
     questions: Question[];
 
-    // Временно убираем связь для упрощения базовой функциональности
-    // @OneToMany(() => TestAttempt, (attempt) => attempt.test)
-    // attempts: TestAttempt[];
+    @OneToMany(() => TestAttempt, (attempt) => attempt.test)
+    attempts: TestAttempt[];
 
     @CreateDateColumn()
     createdAt: Date;

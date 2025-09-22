@@ -1,0 +1,122 @@
+### Регистрация учителя
+POST http://localhost:3001/api/auth/register
+Content-Type: application/json
+
+{
+  "email": "teacher@test.com",
+  "password": "password123",
+  "firstName": "Учитель",
+  "lastName": "Тестовый",
+  "role": "creator"
+}
+
+### Регистрация ученика
+POST http://localhost:3001/api/auth/register
+Content-Type: application/json
+
+{
+  "email": "student@test.com",
+  "password": "password123",
+  "firstName": "Ученик",
+  "lastName": "Тестовый",
+  "role": "user"
+}
+
+### Логин учителя
+POST http://localhost:3001/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "teacher@test.com",
+  "password": "password123"
+}
+
+### Логин ученика
+POST http://localhost:3001/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "student@test.com",
+  "password": "password123"
+}
+
+### Создание теста (нужен токен учителя)
+POST http://localhost:3001/api/tests
+Content-Type: application/json
+Authorization: Bearer YOUR_TEACHER_TOKEN
+
+{
+  "title": "Тест по математике",
+  "description": "Простой тест для проверки знаний",
+  "timeLimit": 30,
+  "questions": [
+    {
+      "text": "Сколько будет 2 + 2?",
+      "type": "multiple_choice",
+      "order": 1,
+      "options": [
+        {
+          "text": "3",
+          "isCorrect": false,
+          "order": 1
+        },
+        {
+          "text": "4",
+          "isCorrect": true,
+          "order": 2
+        },
+        {
+          "text": "5",
+          "isCorrect": false,
+          "order": 3
+        }
+      ]
+    },
+    {
+      "text": "Как называется столица России?",
+      "type": "text_input",
+      "order": 2,
+      "correctTextAnswer": "Москва"
+    }
+  ]
+}
+
+### Публикация теста (нужен токен учителя и ID теста)
+POST http://localhost:3001/api/tests/1/publish
+Authorization: Bearer YOUR_TEACHER_TOKEN
+
+### Получение активных тестов (для ученика)
+GET http://localhost:3001/api/tests
+Authorization: Bearer YOUR_STUDENT_TOKEN
+
+### Получение конкретного теста (для ученика)
+GET http://localhost:3001/api/tests/1
+Authorization: Bearer YOUR_STUDENT_TOKEN
+
+### Начать прохождение теста
+POST http://localhost:3001/api/test-attempts/start
+Content-Type: application/json
+Authorization: Bearer YOUR_STUDENT_TOKEN
+
+{
+  "testId": 1
+}
+
+### Отправить ответ на вопрос
+POST http://localhost:3001/api/test-attempts/1/answer
+Content-Type: application/json
+Authorization: Bearer YOUR_STUDENT_TOKEN
+
+{
+  "questionId": 1,
+  "selectedOptionId": 2
+}
+
+### Завершить тест
+POST http://localhost:3001/api/test-attempts/1/complete
+Content-Type: application/json
+Authorization: Bearer YOUR_STUDENT_TOKEN
+
+{
+  "attemptId": 1
+}

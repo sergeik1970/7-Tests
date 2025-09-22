@@ -13,8 +13,8 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
     const teacherMenuItems = [
         { icon: "🏠", label: "Главная", href: "/dashboard", active: true },
         { icon: "📝", label: "Мои тесты", href: "/dashboard/tests" },
+        { icon: "📊", label: "Статистика", href: "/dashboard/statistics" },
         { icon: "👥", label: "Ученики", href: "/dashboard/participants" },
-        { icon: "📊", label: "Аналитика", href: "/dashboard/analytics" },
         { icon: "⚙️", label: "Настройки", href: "/dashboard/settings" }
     ];
     

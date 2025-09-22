@@ -37,10 +37,9 @@ export class TestAnswer {
     @JoinColumn({ name: "attemptId" })
     attempt: TestAttempt;
 
-    // Временно убираем связь для упрощения
-    // @ManyToOne(() => Question, (question) => question.answers)
-    // @JoinColumn({ name: "questionId" })
-    // question: Question;
+    @ManyToOne(() => Question, (question) => question.answers)
+    @JoinColumn({ name: "questionId" })
+    question: Question;
 
     @ManyToOne(() => QuestionOption, {
         nullable: true,

@@ -26,8 +26,9 @@ export interface LoginData {
 }
 
 export interface QuestionOption {
+    id?: number;
     text: string;
-    isCorrect: boolean;
+    isCorrect?: boolean;
     order: number;
 }
 
@@ -50,6 +51,52 @@ export interface Test {
     creator?: User;
     createdAt?: string;
     updatedAt?: string;
+}
+
+export interface TestAttempt {
+    id: number;
+    testId: number;
+    userId: number;
+    status: 'in_progress' | 'completed' | 'abandoned';
+    startedAt: string;
+    completedAt?: string;
+    score?: number;
+    correctAnswers?: number;
+    totalQuestions: number;
+    test: Test;
+    answers?: TestAnswer[];
+    remainingTime?: number;
+}
+
+export interface TestAnswer {
+    id: number;
+    attemptId: number;
+    questionId: number;
+    selectedOptionId?: number;
+    textAnswer?: string;
+    isCorrect: boolean;
+    selectedOption?: QuestionOption;
+}
+
+export interface TeacherStatistics {
+    overview: {
+        totalTests: number;
+        activeTests: number;
+        draftTests: number;
+        totalStudents: number;
+        totalAttempts: number;
+        completedAttempts: number;
+        averageScore: number;
+    };
+    testStatistics: {
+        id: number;
+        title: string;
+        status: string;
+        totalAttempts: number;
+        completedAttempts: number;
+        averageScore: number;
+        createdAt: string;
+    }[];
 }
 
 export interface CreateTestData {
@@ -213,6 +260,33 @@ class ApiService {
         return response.json();
     }
 
+    async deactivateTest(id: number): Promise<Test> {
+        const response = await fetch(`${API_BASE_URL}/tests/${id}/deactivate`, {
+            method: 'POST',
+            headers: this.getAuthHeaders(),
+        });
+
+        if (!response.ok) {
+            const error = await response.json();
+            throw new Error(error.message || 'Ошибка деактивации теста');
+        }
+
+        return response.json();
+    }
+
+    async getTeacherStatistics(): Promise<TeacherStatistics> {
+        const response = await fetch(`${API_BASE_URL}/tests/statistics/overview`, {
+            headers: this.getAuthHeaders(),
+        });
+
+        if (!response.ok) {
+            const error = await response.json();
+            throw new Error(error.message || 'Ошибка получения статистики');
+        }
+
+        return response.json();
+    }
+
     async deleteTest(id: number): Promise<void> {
         const response = await fetch(`${API_BASE_URL}/tests/${id}`, {
             method: 'DELETE',
@@ -223,6 +297,68 @@ class ApiService {
             const error = await response.json();
             throw new Error(error.message || 'Ошибка удаления теста');
         }
+    }
+
+    // Методы для работы с попытками прохождения тестов
+    async startTest(testId: number): Promise<TestAttempt> {
+        const response = await fetch(`${API_BASE_URL}/test-attempts/start`, {
+            method: 'POST',
+            headers: this.getAuthHeaders(),
+            body: JSON.stringify({ testId }),
+        });
+
+        if (!response.ok) {
+            const error = await response.json();
+            throw new Error(error.message || 'Ошибка начала теста');
+        }
+
+        return response.json();
+    }
+
+    async getAttempt(attemptId: number): Promise<TestAttempt> {
+        const response = await fetch(`${API_BASE_URL}/test-attempts/${attemptId}`, {
+            headers: this.getAuthHeaders(),
+        });
+
+        if (!response.ok) {
+            const error = await response.json();
+            throw new Error(error.message || 'Ошибка получения попытки');
+        }
+
+        return response.json();
+    }
+
+    async submitAnswer(attemptId: number, questionId: number, selectedOptionId?: number, textAnswer?: string): Promise<TestAnswer> {
+        const response = await fetch(`${API_BASE_URL}/test-attempts/${attemptId}/answer`, {
+            method: 'POST',
+            headers: this.getAuthHeaders(),
+            body: JSON.stringify({
+                questionId,
+                selectedOptionId,
+                textAnswer,
+            }),
+        });
+
+        if (!response.ok) {
+            const error = await response.json();
+            throw new Error(error.message || 'Ошибка отправки ответа');
+        }
+
+        return response.json();
+    }
+
+    async completeTest(attemptId: number): Promise<TestAttempt> {
+        const response = await fetch(`${API_BASE_URL}/test-attempts/${attemptId}/complete`, {
+            method: 'POST',
+            headers: this.getAuthHeaders(),
+        });
+
+        if (!response.ok) {
+            const error = await response.json();
+            throw new Error(error.message || 'Ошибка завершения теста');
+        }
+
+        return response.json();
     }
 }
 
@@ -243,4 +379,13 @@ export const getTests = () => apiService.getTests();
 export const getTest = (id: number) => apiService.getTest(id);
 export const updateTest = (id: number, data: Partial<CreateTestData>) => apiService.updateTest(id, data);
 export const publishTest = (id: number) => apiService.publishTest(id);
+export const deactivateTest = (id: number) => apiService.deactivateTest(id);
 export const deleteTest = (id: number) => apiService.deleteTest(id);
+export const getTeacherStatistics = () => apiService.getTeacherStatistics();
+
+// Функции для работы с попытками прохождения тестов
+export const startTest = (testId: number) => apiService.startTest(testId);
+export const getAttempt = (attemptId: number) => apiService.getAttempt(attemptId);
+export const submitAnswer = (attemptId: number, questionId: number, selectedOptionId?: number, textAnswer?: string) => 
+    apiService.submitAnswer(attemptId, questionId, selectedOptionId, textAnswer);
+export const completeTest = (attemptId: number) => apiService.completeTest(attemptId);
