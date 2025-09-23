@@ -5,6 +5,7 @@ import Button from "@/shared/components/Button";
 import { useAuth } from "@/contexts/AuthContext";
 import { getTests } from "@/services/api";
 import type { Test } from "@/services/api";
+import { isTeacher, getDashboardTitle } from "@/shared/utils/roles";
 import styles from "./dashboard.module.scss";
 
 const DashboardPage = () => {
@@ -32,7 +33,7 @@ const DashboardPage = () => {
 
     // Вычисляем статистику на основе реальных данных
     const getStats = () => {
-        if (user?.role === 'creator') {
+        if (user?.role && isTeacher(user.role)) {
             const totalTests = tests.length;
             const activeTests = tests.filter(test => test.status === 'active').length;
             const draftTests = tests.filter(test => test.status === 'draft').length;
@@ -63,9 +64,9 @@ const DashboardPage = () => {
             <div className={styles.dashboard}>
                 <div className={styles.header}>
                     <h1 className={styles.title}>
-                        {user?.role === 'creator' ? 'Панель учителя' : 'Панель ученика'}
+                        {user?.role ? getDashboardTitle(user.role) : 'Панель пользователя'}
                     </h1>
-                    {user?.role === 'creator' && (
+                    {user?.role && isTeacher(user.role) && (
                         <Button 
                             variant="primary"
                             onClick={() => router.push('/dashboard/tests/create')}
@@ -90,7 +91,7 @@ const DashboardPage = () => {
                 <div className={styles.section}>
                     <div className={styles.sectionHeader}>
                         <h2 className={styles.sectionTitle}>
-                            {user?.role === 'creator' ? 'Мои тесты' : 'Доступные тесты'}
+                            {user?.role && isTeacher(user.role) ? 'Мои тесты' : 'Доступные тесты'}
                         </h2>
                         <Button 
                             variant="outline" 
@@ -114,12 +115,12 @@ const DashboardPage = () => {
                     ) : tests.length === 0 ? (
                         <div className={styles.emptyState}>
                             <p>
-                                {user?.role === 'creator' 
+                                {user?.role && isTeacher(user.role)
                                     ? 'У вас пока нет тестов' 
                                     : 'Нет доступных тестов'
                                 }
                             </p>
-                            {user?.role === 'creator' && (
+                            {user?.role && isTeacher(user.role) && (
                                 <Button 
                                     variant="primary"
                                     size="small"
@@ -143,7 +144,7 @@ const DashboardPage = () => {
                                             {test.timeLimit && (
                                                 <span>⏱️ {test.timeLimit} мин</span>
                                             )}
-                                            {test.creator && user?.role !== 'creator' && (
+                                            {test.creator && user?.role && !isTeacher(user.role) && (
                                                 <span>👨‍🏫 {test.creator.name}</span>
                                             )}
                                         </div>
@@ -159,7 +160,7 @@ const DashboardPage = () => {
                                             size="small"
                                             onClick={() => router.push(`/dashboard/tests/${test.id}`)}
                                         >
-                                            {user?.role === 'creator' ? 'Управлять' : 
+                                            {user?.role && isTeacher(user.role) ? 'Управлять' : 
                                              test.status === 'active' ? 'Пройти' : 'Просмотр'}
                                         </Button>
                                     </div>

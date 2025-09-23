@@ -11,7 +11,7 @@ interface AuthContextType {
         email: string;
         password: string;
         confirmPassword: string;
-        role?: 'participant' | 'creator';
+        role?: 'pupil' | 'teacher' | 'student' | 'professor';
     }) => Promise<void>;
     logout: () => void;
 }
@@ -56,7 +56,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         email: string;
         password: string;
         confirmPassword: string;
-        role?: 'participant' | 'creator';
+        role?: 'pupil' | 'teacher' | 'student' | 'professor';
     }) => {
         const response = await apiService.register(userData);
         setUser(response.user);

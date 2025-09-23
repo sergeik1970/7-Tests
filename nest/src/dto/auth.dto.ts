@@ -25,7 +25,7 @@ export class RegisterDto {
 
     @IsEnum(UserRole)
     @IsOptional()
-    role?: UserRole = UserRole.PARTICIPANT;
+    role?: UserRole = UserRole.PUPIL;
 }
 
 export class LoginDto {

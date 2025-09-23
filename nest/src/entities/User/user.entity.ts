@@ -10,8 +10,10 @@ import { Test } from "../Test/test.entity";
 import { TestAttempt } from "../TestAttempt/testAttempt.entity";
 
 export enum UserRole {
-    PARTICIPANT = "participant",
-    CREATOR = "creator",
+    PUPIL = "pupil",
+    TEACHER = "teacher",
+    STUDENT = "student",
+    PROFESSOR = "professor",
 }
 
 @Entity("users")
@@ -31,7 +33,7 @@ export class User {
     @Column({
         type: "enum",
         enum: UserRole,
-        default: UserRole.PARTICIPANT,
+        default: UserRole.PUPIL,
     })
     role: UserRole;
 

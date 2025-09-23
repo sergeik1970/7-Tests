@@ -5,6 +5,7 @@ import Button from "@/shared/components/Button";
 import { useAuth } from "@/contexts/AuthContext";
 import { getTests } from "@/services/api";
 import type { Test } from "@/services/api";
+import { isTeacher } from "@/shared/utils/roles";
 import styles from "./tests-list.module.scss";
 
 const TestsListPage = () => {
@@ -63,9 +64,9 @@ const TestsListPage = () => {
             <div className={styles.testsPage}>
                 <div className={styles.header}>
                     <h1 className={styles.title}>
-                        {user?.role === 'creator' ? 'Мои тесты' : 'Доступные тесты'}
+                        {user?.role && isTeacher(user.role) ? 'Мои тесты' : 'Доступные тесты'}
                     </h1>
-                    {user?.role === 'creator' && (
+                    {user?.role && isTeacher(user.role) && (
                         <Button 
                             variant="primary"
                             onClick={() => router.push('/dashboard/tests/create')}
@@ -84,18 +85,18 @@ const TestsListPage = () => {
                 {tests.length === 0 ? (
                     <div className={styles.emptyState}>
                         <h2>
-                            {user?.role === 'creator' 
+                            {user?.role && isTeacher(user.role)
                                 ? 'У вас пока нет тестов' 
                                 : 'Нет доступных тестов'
                             }
                         </h2>
                         <p>
-                            {user?.role === 'creator' 
+                            {user?.role && isTeacher(user.role)
                                 ? 'Создайте свой первый тест, чтобы начать работу' 
                                 : 'Пока нет активных тестов для прохождения'
                             }
                         </p>
-                        {user?.role === 'creator' && (
+                        {user?.role && isTeacher(user.role) && (
                             <Button 
                                 variant="primary"
                                 onClick={() => router.push('/dashboard/tests/create')}
@@ -131,7 +132,7 @@ const TestsListPage = () => {
                                                 ⏱️ {test.timeLimit} мин
                                             </span>
                                         )}
-                                        {test.creator && user?.role !== 'creator' && (
+                                        {test.creator && user?.role && !isTeacher(user.role) && (
                                             <span className={styles.metaItem}>
                                                 👨‍🏫 {test.creator.name}
                                             </span>
@@ -145,7 +146,7 @@ const TestsListPage = () => {
                                         size="small"
                                         onClick={() => router.push(`/dashboard/tests/${test.id}`)}
                                     >
-                                        {user?.role === 'creator' ? 'Управлять' : 
+                                        {user?.role && isTeacher(user.role) ? 'Управлять' : 
                                          test.status === 'active' ? 'Пройти' : 'Просмотр'}
                                     </Button>
                                 </div>

@@ -5,6 +5,7 @@ import Button from "@/shared/components/Button";
 import InputText from "@/shared/components/InputText";
 import { useAuth } from "@/contexts/AuthContext";
 import { createTest } from "@/services/api";
+import { isTeacher } from "@/shared/utils/roles";
 import styles from "./create.module.scss";
 
 interface QuestionOption {
@@ -42,7 +43,7 @@ const CreateTestPage = () => {
     });
 
     // Проверяем права доступа
-    if (user?.role !== 'creator') {
+    if (!user?.role || (!isTeacher(user.role))) {
         router.push('/dashboard');
         return null;
     }
@@ -53,10 +54,8 @@ const CreateTestPage = () => {
             type: 'multiple_choice',
             order: testForm.questions.length,
             options: [
-                { text: "", isCorrect: true, order: 0 },
-                { text: "", isCorrect: false, order: 1 },
-                { text: "", isCorrect: false, order: 2 },
-                { text: "", isCorrect: false, order: 3 }
+                { text: "", isCorrect: false, order: 0 },
+                { text: "", isCorrect: false, order: 1 }
             ]
         };
         
@@ -96,20 +95,173 @@ const CreateTestPage = () => {
         }));
     };
 
-    const setCorrectOption = (questionIndex: number, optionIndex: number) => {
-        setTestForm(prev => ({
-            ...prev,
-            questions: prev.questions.map((q, i) => 
-                i === questionIndex ? {
-                    ...q,
-                    options: q.options?.map((opt, j) => ({
-                        ...opt,
-                        isCorrect: j === optionIndex
-                    }))
-                } : q
-            )
-        }));
+    const toggleCorrectOption = (questionIndex: number, optionIndex: number) => {
+        setTestForm(prev => {
+            const question = prev.questions[questionIndex];
+            const option = question.options?.[optionIndex];
+            
+            // Не позволяем выбирать пустые варианты как правильные
+            if (!option?.text.trim() && !option?.isCorrect) {
+                return prev;
+            }
+            
+            return {
+                ...prev,
+                questions: prev.questions.map((q, i) => 
+                    i === questionIndex ? {
+                        ...q,
+                        options: q.options?.map((opt, j) => 
+                            j === optionIndex ? { ...opt, isCorrect: !opt.isCorrect } : opt
+                        )
+                    } : q
+                )
+            };
+        });
     };
+
+    const getCorrectAnswersCount = (question: Question): number => {
+        return question.options?.filter(opt => opt.isCorrect).length || 0;
+    };
+
+    const hasCorrectAnswer = (question: Question): boolean => {
+        return question.options?.some(opt => opt.isCorrect) || false;
+    };
+
+    const handleOptionKeyDown = (questionIndex: number, optionIndex: number, e: React.KeyboardEvent<HTMLInputElement>) => {
+        const question = testForm.questions[questionIndex];
+        const optionsCount = question.options?.length || 0;
+        
+        if (e.key === 'ArrowUp' && optionIndex > 0) {
+            e.preventDefault();
+            // Фокусируемся на предыдущем поле ввода варианта
+            const prevInput = document.querySelector(
+                `input[data-question="${questionIndex}"][data-option="${optionIndex - 1}"]`
+            ) as HTMLInputElement;
+            if (prevInput) {
+                prevInput.focus();
+                // Устанавливаем курсор в конец
+                setTimeout(() => {
+                    prevInput.setSelectionRange(prevInput.value.length, prevInput.value.length);
+                }, 0);
+            }
+        } else if (e.key === 'ArrowDown' && optionIndex < optionsCount - 1) {
+            e.preventDefault();
+            // Фокусируемся на следующем поле ввода варианта
+            const nextInput = document.querySelector(
+                `input[data-question="${questionIndex}"][data-option="${optionIndex + 1}"]`
+            ) as HTMLInputElement;
+            if (nextInput) {
+                nextInput.focus();
+                // Устанавливаем курсор в конец
+                setTimeout(() => {
+                    nextInput.setSelectionRange(nextInput.value.length, nextInput.value.length);
+                }, 0);
+            }
+        }
+    };
+
+    const handleOptionTextChange = (questionIndex: number, optionIndex: number, value: string) => {
+        setTestForm(prev => {
+            let newForm = {
+                ...prev,
+                questions: prev.questions.map((q, i) => 
+                    i === questionIndex ? {
+                        ...q,
+                        options: q.options?.map((opt, j) => 
+                            j === optionIndex ? { 
+                                ...opt, 
+                                text: value,
+                                // Если текст становится пустым, снимаем отметку "правильный ответ"
+                                isCorrect: value.trim() ? opt.isCorrect : false
+                            } : opt
+                        )
+                    } : q
+                )
+            };
+
+            const question = newForm.questions[questionIndex];
+            const isLastOption = optionIndex === (question.options?.length || 0) - 1;
+            const hasLessThan10Options = (question.options?.length || 0) < 10;
+            
+            // Если это последняя опция и она не пустая, и опций меньше 10 - добавляем новую
+            if (value.trim() && isLastOption && hasLessThan10Options) {
+                const newOption: QuestionOption = {
+                    text: "",
+                    isCorrect: false,
+                    order: question.options?.length || 0
+                };
+                
+                newForm = {
+                    ...newForm,
+                    questions: newForm.questions.map((q, i) => 
+                        i === questionIndex ? {
+                            ...q,
+                            options: [...(q.options || []), newOption]
+                        } : q
+                    )
+                };
+            }
+
+            // Если поле очищено (не последнее) - сдвигаем все варианты
+            if (!value.trim() && !isLastOption) {
+                const updatedQuestion = newForm.questions[questionIndex];
+                if (updatedQuestion.options && updatedQuestion.options.length > 2) {
+                    // Удаляем текущий пустой вариант и сдвигаем остальные
+                    const filteredOptions = updatedQuestion.options.filter((_, idx) => idx !== optionIndex);
+                    
+                    // Если после удаления остается меньше 2 вариантов, добавляем пустой
+                    const finalOptions = filteredOptions.length < 2 
+                        ? [...filteredOptions, { text: "", isCorrect: false, order: filteredOptions.length }]
+                        : filteredOptions;
+                    
+                    newForm = {
+                        ...newForm,
+                        questions: newForm.questions.map((q, i) => 
+                            i === questionIndex ? {
+                                ...q,
+                                options: finalOptions.map((opt, idx) => ({
+                                    ...opt,
+                                    order: idx
+                                }))
+                            } : q
+                        )
+                    };
+                }
+            } else {
+                // Удаляем пустые опции в конце (но оставляем минимум 2)
+                const updatedQuestion = newForm.questions[questionIndex];
+                if (updatedQuestion.options && updatedQuestion.options.length > 2) {
+                    // Находим последние пустые опции
+                    let lastNonEmptyIndex = updatedQuestion.options.length - 1;
+                    while (lastNonEmptyIndex >= 2 && !updatedQuestion.options[lastNonEmptyIndex].text.trim()) {
+                        lastNonEmptyIndex--;
+                    }
+                    
+                    // Оставляем только до последней непустой опции + 1 (для ввода новой)
+                    if (lastNonEmptyIndex < updatedQuestion.options.length - 1) {
+                        const trimmedOptions = updatedQuestion.options.slice(0, lastNonEmptyIndex + 2);
+                        
+                        newForm = {
+                            ...newForm,
+                            questions: newForm.questions.map((q, i) => 
+                                i === questionIndex ? {
+                                    ...q,
+                                    options: trimmedOptions.map((opt, idx) => ({
+                                        ...opt,
+                                        order: idx
+                                    }))
+                                } : q
+                            )
+                        };
+                    }
+                }
+            }
+
+            return newForm;
+        });
+    };
+
+
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -117,7 +269,30 @@ const CreateTestPage = () => {
         setError("");
 
         try {
-            const test = await createTest(testForm);
+            // Очищаем пустые варианты ответов перед отправкой
+            const cleanedTestForm = {
+                ...testForm,
+                questions: testForm.questions.map(question => ({
+                    ...question,
+                    options: question.options?.filter(opt => opt.text.trim() !== "").map((opt, index) => ({
+                        ...opt,
+                        order: index
+                    }))
+                }))
+            };
+
+            // Проверяем, что у каждого вопроса с выбором ответа есть хотя бы один правильный ответ
+            const invalidQuestions = cleanedTestForm.questions.filter(question => 
+                question.type === 'multiple_choice' && 
+                !hasCorrectAnswer(question)
+            );
+
+            if (invalidQuestions.length > 0) {
+                setError("Пожалуйста, выберите правильные ответы для всех вопросов с выбором вариантов");
+                return;
+            }
+
+            const test = await createTest(cleanedTestForm);
             router.push(`/dashboard/tests/${test.id}`);
         } catch (err) {
             setError(err instanceof Error ? err.message : "Ошибка создания теста");
@@ -245,10 +420,8 @@ const CreateTestPage = () => {
                                             } else {
                                                 updateQuestion(questionIndex, 'correctTextAnswer', undefined);
                                                 updateQuestion(questionIndex, 'options', [
-                                                    { text: "", isCorrect: true, order: 0 },
-                                                    { text: "", isCorrect: false, order: 1 },
-                                                    { text: "", isCorrect: false, order: 2 },
-                                                    { text: "", isCorrect: false, order: 3 }
+                                                    { text: "", isCorrect: false, order: 0 },
+                                                    { text: "", isCorrect: false, order: 1 }
                                                 ]);
                                             }
                                         }}
@@ -264,24 +437,36 @@ const CreateTestPage = () => {
                                         <label className={styles.label}>Варианты ответов</label>
                                         {question.options.map((option, optionIndex) => (
                                             <div key={optionIndex} className={styles.option}>
-                                                <input
-                                                    type="radio"
-                                                    name={`question-${questionIndex}-correct`}
-                                                    checked={option.isCorrect}
-                                                    onChange={() => setCorrectOption(questionIndex, optionIndex)}
-                                                    disabled={isLoading}
-                                                />
+                                                <div 
+                                                    className={`${styles.customRadio} ${option.isCorrect ? styles.checked : ''} ${!option.text.trim() ? styles.disabled : ''}`}
+                                                    onClick={() => toggleCorrectOption(questionIndex, optionIndex)}
+                                                >
+                                                    {option.isCorrect && <div className={styles.radioInner}></div>}
+                                                </div>
                                                 <InputText
                                                     value={option.text}
-                                                    onChange={(e) => updateQuestionOption(questionIndex, optionIndex, 'text', e.target.value)}
+                                                    onChange={(e) => handleOptionTextChange(questionIndex, optionIndex, e.target.value)}
+                                                    onKeyDown={(e) => handleOptionKeyDown(questionIndex, optionIndex, e)}
                                                     placeholder={`Вариант ${optionIndex + 1}`}
-                                                    required
+                                                    required={optionIndex < 2}
                                                     disabled={isLoading}
+                                                    data-question={questionIndex}
+                                                    data-option={optionIndex}
                                                 />
                                             </div>
                                         ))}
                                         <small className={styles.hint}>
-                                            Выберите правильный ответ с помощью радиокнопки
+                                            Нажмите на кружки рядом с правильными ответами. Можно выбрать один или несколько. Новые варианты добавляются автоматически при заполнении (до 10 вариантов). Используйте стрелки ↑↓ для навигации между вариантами.
+                                            {getCorrectAnswersCount(question) > 1 && (
+                                                <span className={styles.multipleAnswers}>
+                                                    <br />✓ Выбрано правильных ответов: {getCorrectAnswersCount(question)} из {question.options?.length || 0}
+                                                </span>
+                                            )}
+                                            {!hasCorrectAnswer(question) && (
+                                                <span className={styles.noAnswers}>
+                                                    <br />⚠️ Не выбран ни один правильный ответ
+                                                </span>
+                                            )}
                                         </small>
                                     </div>
                                 )}
@@ -307,6 +492,19 @@ const CreateTestPage = () => {
                         {testForm.questions.length === 0 && (
                             <div className={styles.emptyState}>
                                 <p>Пока нет вопросов. Добавьте первый вопрос для начала.</p>
+                            </div>
+                        )}
+
+                        {testForm.questions.length > 0 && (
+                            <div className={styles.addQuestionBottom}>
+                                <Button 
+                                    type="button" 
+                                    variant="outline" 
+                                    onClick={addQuestion}
+                                    disabled={isLoading}
+                                >
+                                    Добавить еще вопрос
+                                </Button>
                             </div>
                         )}
                     </div>

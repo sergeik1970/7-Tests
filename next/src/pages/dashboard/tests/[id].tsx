@@ -5,6 +5,7 @@ import Button from "@/shared/components/Button";
 import { useAuth } from "@/contexts/AuthContext";
 import { getTest, publishTest, deactivateTest, deleteTest, startTest } from "@/services/api";
 import type { Test } from "@/services/api";
+import { isTeacher } from "@/shared/utils/roles";
 import styles from "./test-detail.module.scss";
 
 const TestDetailPage = () => {
@@ -137,7 +138,7 @@ const TestDetailPage = () => {
         );
     }
 
-    const isOwner = user?.role === 'creator' && test.creator?.id === user.id;
+    const isOwner = user?.role && isTeacher(user.role) && test.creator?.id === user.id;
 
     return (
         <DashboardLayout>

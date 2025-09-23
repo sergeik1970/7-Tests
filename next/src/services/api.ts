@@ -4,7 +4,7 @@ export interface User {
     id: number;
     email: string;
     name: string;
-    role: 'participant' | 'creator';
+    role: 'pupil' | 'teacher' | 'student' | 'professor';
 }
 
 export interface AuthResponse {
@@ -17,7 +17,7 @@ export interface RegisterData {
     email: string;
     password: string;
     confirmPassword: string;
-    role?: 'participant' | 'creator';
+    role?: 'pupil' | 'teacher' | 'student' | 'professor';
 }
 
 export interface LoginData {

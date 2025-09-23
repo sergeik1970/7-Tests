@@ -25,10 +25,10 @@ export class TestService {
     ) {}
 
     async create(createTestDto: CreateTestDto, creatorId: number): Promise<Test> {
-        // Проверяем, что пользователь - учитель
+        // Проверяем, что пользователь - учитель или преподаватель
         const creator = await this.userRepository.findOne({ where: { id: creatorId } });
-        if (!creator || creator.role !== UserRole.CREATOR) {
-            throw new ForbiddenException('Только учителя могут создавать тесты');
+        if (!creator || (creator.role !== UserRole.TEACHER && creator.role !== UserRole.PROFESSOR)) {
+            throw new ForbiddenException('Только учителя и преподаватели могут создавать тесты');
         }
 
         // Создаем тест
@@ -257,10 +257,10 @@ export class TestService {
 
     // Получение статистики для учителя
     async getTeacherStatistics(creatorId: number) {
-        // Проверяем, что пользователь - учитель
+        // Проверяем, что пользователь - учитель или преподаватель
         const creator = await this.userRepository.findOne({ where: { id: creatorId } });
-        if (!creator || creator.role !== UserRole.CREATOR) {
-            throw new ForbiddenException('Только учителя могут получать статистику');
+        if (!creator || (creator.role !== UserRole.TEACHER && creator.role !== UserRole.PROFESSOR)) {
+            throw new ForbiddenException('Только учителя и преподаватели могут получать статистику');
         }
 
         // Получаем все тесты учителя

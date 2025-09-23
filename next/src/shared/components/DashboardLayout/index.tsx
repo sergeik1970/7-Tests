@@ -1,5 +1,6 @@
 import React, { ReactNode } from "react";
 import { useAuth } from "@/contexts/AuthContext";
+import { isTeacher, getRoleDisplayName } from "@/shared/utils/roles";
 import styles from "./index.module.scss";
 
 interface DashboardLayoutProps {
@@ -26,7 +27,7 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
         { icon: "⚙️", label: "Настройки", href: "/dashboard/settings" }
     ];
     
-    const menuItems = user?.role === 'creator' ? teacherMenuItems : studentMenuItems;
+    const menuItems = user?.role && isTeacher(user.role) ? teacherMenuItems : studentMenuItems;
 
     return (
         <div className={styles.layout}>
@@ -56,7 +57,7 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
                     <div className={styles.userInfo}>
                         <div className={styles.userName}>{user?.name || 'Пользователь'}</div>
                         <div className={styles.userRole}>
-                            {user?.role === 'creator' ? 'Учитель' : 'Ученик'}
+                            {user?.role ? getRoleDisplayName(user.role) : 'Пользователь'}
                         </div>
                     </div>
                 </div>

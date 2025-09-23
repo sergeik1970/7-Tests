@@ -1,6 +1,7 @@
 import React, { ReactElement } from "react";
 import Button from "@/shared/components/Button";
 import { useAuth } from "@/contexts/AuthContext";
+import { getRoleDisplayName } from "@/shared/utils/roles";
 import styles from "./index.module.scss";
 
 const Header = (): ReactElement => {
@@ -32,7 +33,7 @@ const Header = (): ReactElement => {
                                     Привет, {user?.name}!
                                 </span>
                                 <span className={styles.userRole}>
-                                    {user?.role === 'creator' ? 'Учитель' : 'Ученик'}
+                                    {user?.role ? getRoleDisplayName(user.role) : 'Пользователь'}
                                 </span>
                             </div>
                             <Button variant="outline" size="small" onClick={handleLogout}>

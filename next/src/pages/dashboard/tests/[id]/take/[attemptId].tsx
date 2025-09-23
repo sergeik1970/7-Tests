@@ -31,7 +31,21 @@ const TakeTestPage = () => {
 
         const timer = setInterval(() => {
             if (attempt.remainingTime !== undefined) {
-                const newTimeLeft = attempt.remainingTime * 60 - Math.floor((Date.now() - new Date(attempt.startedAt).getTime()) / 1000);
+                const now = Date.now();
+                const startTime = new Date(attempt.startedAt).getTime();
+                const elapsedSeconds = Math.floor((now - startTime) / 1000);
+                const totalTimeInSeconds = attempt.remainingTime * 60;
+                const newTimeLeft = totalTimeInSeconds - elapsedSeconds;
+                
+                // Отладочная информация
+                console.log('Timer debug:', {
+                    remainingTime: attempt.remainingTime,
+                    totalTimeInSeconds,
+                    elapsedSeconds,
+                    newTimeLeft,
+                    startedAt: attempt.startedAt
+                });
+                
                 setTimeLeft(Math.max(0, newTimeLeft));
                 
                 if (newTimeLeft <= 0) {
@@ -60,7 +74,13 @@ const TakeTestPage = () => {
             setAnswers(existingAnswers);
             
             if (attemptData.remainingTime !== undefined) {
-                setTimeLeft(attemptData.remainingTime * 60);
+                const initialTimeLeft = attemptData.remainingTime * 60;
+                console.log('Initial time setup:', {
+                    remainingTime: attemptData.remainingTime,
+                    initialTimeLeft,
+                    startedAt: attemptData.startedAt
+                });
+                setTimeLeft(initialTimeLeft);
             }
         } catch (err) {
             setError(err instanceof Error ? err.message : "Ошибка загрузки теста");
@@ -142,8 +162,30 @@ const TakeTestPage = () => {
     };
 
     const formatTime = (seconds: number) => {
-        const minutes = Math.floor(seconds / 60);
-        const remainingSeconds = seconds % 60;
+        // Проверяем, что значение корректное
+        if (!seconds || seconds < 0 || !isFinite(seconds)) {
+            return "0:00";
+        }
+        
+        // Округляем до целого числа секунд
+        const totalSeconds = Math.floor(seconds);
+        
+        // Если время больше 24 часов, что-то пошло не так
+        if (totalSeconds > 86400) {
+            console.warn('Некорректное время:', seconds);
+            return "0:00";
+        }
+        
+        const hours = Math.floor(totalSeconds / 3600);
+        const minutes = Math.floor((totalSeconds % 3600) / 60);
+        const remainingSeconds = totalSeconds % 60;
+        
+        // Если больше часа, показываем часы
+        if (hours > 0) {
+            return `${hours}:${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
+        }
+        
+        // Иначе показываем только минуты и секунды
         return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
     };
 

@@ -4,6 +4,7 @@ import DashboardLayout from "@/shared/components/DashboardLayout";
 import { useAuth } from "@/contexts/AuthContext";
 import { getTeacherStatistics } from "@/services/api";
 import type { TeacherStatistics } from "@/services/api";
+import { isTeacher } from "@/shared/utils/roles";
 import styles from "./statistics.module.scss";
 
 const StatisticsPage = () => {
@@ -14,8 +15,8 @@ const StatisticsPage = () => {
     const [error, setError] = useState("");
 
     useEffect(() => {
-        // Проверяем, что пользователь - учитель
-        if (user && user.role !== 'creator') {
+        // Проверяем, что пользователь - учитель или преподаватель
+        if (user && !isTeacher(user.role)) {
             router.push('/dashboard');
             return;
         }

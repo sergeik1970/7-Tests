@@ -59,21 +59,21 @@ export class TestAttemptController {
     // Методы для учителей
     @Get("test/:testId/attempts")
     @UseGuards(RolesGuard)
-    @Roles(UserRole.CREATOR)
+    @Roles(UserRole.TEACHER, UserRole.PROFESSOR)
     getTestAttempts(@Param("testId", ParseIntPipe) testId: number, @Request() req) {
         return this.testAttemptService.getTestAttempts(testId, req.user.id);
     }
 
     @Get("test/:testId/statistics")
     @UseGuards(RolesGuard)
-    @Roles(UserRole.CREATOR)
+    @Roles(UserRole.TEACHER, UserRole.PROFESSOR)
     getTestStatistics(@Param("testId", ParseIntPipe) testId: number, @Request() req) {
         return this.testAttemptService.getTestStatistics(testId, req.user.id);
     }
 
     @Get("details/:attemptId")
     @UseGuards(RolesGuard)
-    @Roles(UserRole.CREATOR)
+    @Roles(UserRole.TEACHER, UserRole.PROFESSOR)
     getAttemptDetails(@Param("attemptId", ParseIntPipe) attemptId: number, @Request() req) {
         return this.testAttemptService.getAttemptDetails(attemptId, req.user.id);
     }

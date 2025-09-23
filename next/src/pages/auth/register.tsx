@@ -12,7 +12,7 @@ const RegisterPage = () => {
         email: "",
         password: "",
         confirmPassword: "",
-        role: "participant" as "participant" | "creator"
+        role: "pupil" as "pupil" | "teacher" | "student" | "professor"
     });
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState("");
@@ -88,8 +88,10 @@ const RegisterPage = () => {
                             onChange={(e) => handleChange("role", e.target.value)}
                             disabled={isLoading}
                         >
-                            <option value="participant">Ученик</option>
-                            <option value="creator">Учитель</option>
+                            <option value="pupil">Ученик</option>
+                            <option value="teacher">Учитель</option>
+                            <option value="student">Студент</option>
+                            <option value="professor">Преподаватель</option>
                         </select>
                     </div>
 
