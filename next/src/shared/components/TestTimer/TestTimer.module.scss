@@ -1,0 +1,23 @@
+.testTimer {
+    font-weight: 500;
+    font-size: 16px;
+    
+    &.normal {
+        color: #0369a1;
+    }
+    
+    &.warning {
+        color: #f57c00;
+    }
+    
+    &.critical {
+        color: #dc2626;
+    }
+}
+
+// Адаптивность для мобильных устройств
+@media (max-width: 768px) {
+    .testTimer {
+        font-size: 14px;
+    }
+}

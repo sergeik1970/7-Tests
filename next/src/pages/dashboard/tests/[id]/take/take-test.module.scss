@@ -32,18 +32,7 @@
 }
 
 .timer {
-    background: #f0f9ff;
-    border: 1px solid #0ea5e9;
-    border-radius: 8px;
-    padding: 12px 16px;
-    font-weight: 500;
-    color: #0369a1;
-    
-    &.warning {
-        background: #fef2f2;
-        border-color: #ef4444;
-        color: #dc2626;
-    }
+    // Стили для контейнера таймера, если нужны дополнительные настройки
 }
 
 
@@ -87,6 +76,18 @@
     gap: 12px;
 }
 
+.choiceHint {
+    background: #f0f9ff;
+    border: 1px solid #0ea5e9;
+    border-radius: 6px;
+    padding: 8px 12px;
+    font-size: 14px;
+    color: #0369a1;
+    font-weight: 500;
+    margin-bottom: 8px;
+    text-align: center;
+}
+
 .optionLabel {
     display: flex;
     align-items: center;
@@ -95,19 +96,68 @@
     border-radius: 8px;
     cursor: pointer;
     transition: all 0.2s ease;
+    position: relative;
     
     &:hover {
-        border-color: #0ea5e9;
-        background: #f0f9ff;
+        border-color: #10b981;
+        background: #f0fdf4;
     }
     
-    input[type="radio"] {
+    input[type="checkbox"], input[type="radio"] {
+        appearance: none;
+        width: 20px;
+        height: 20px;
+        border: 2px solid #d1d5db;
         margin-right: 12px;
-        width: 18px;
-        height: 18px;
-        accent-color: #0ea5e9;
+        position: relative;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        background: white;
+        
+        &:hover {
+            border-color: #10b981;
+        }
+        
+        &:checked {
+            background: #10b981;
+            border-color: #10b981;
+        }
     }
     
+    // Стили для чекбоксов (квадратные с галочкой)
+    input[type="checkbox"] {
+        border-radius: 4px;
+        
+        &:checked::after {
+            content: '✓';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            font-size: 12px;
+            font-weight: bold;
+        }
+    }
+    
+    // Стили для радиокнопок (круглые с точкой)
+    input[type="radio"] {
+        border-radius: 50%;
+        
+        &:checked::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 8px;
+            height: 8px;
+            background: white;
+            border-radius: 50%;
+        }
+    }
+    
+    input[type="checkbox"]:checked + .optionText,
     input[type="radio"]:checked + .optionText {
         font-weight: 500;
         color: #0369a1;
@@ -244,7 +294,8 @@
     }
     
     .timer {
-        text-align: center;
+        display: flex;
+        justify-content: center;
     }
     
     .questionCard {

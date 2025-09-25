@@ -1,13 +1,20 @@
-import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
-import { Test, TestStatus } from '../entities/Test/test.entity';
-import { Question, QuestionType } from '../entities/Question/question.entity';
-import { QuestionOption } from '../entities/QuestionOption/questionOption.entity';
-import { TestAttempt, AttemptStatus } from '../entities/TestAttempt/testAttempt.entity';
-import { CreateTestDto } from '../dto/test/create-test.dto';
-import { UpdateTestDto } from '../dto/test/update-test.dto';
-import { User, UserRole } from '../entities/User/user.entity';
+import {
+    Injectable,
+    NotFoundException,
+    ForbiddenException,
+} from "@nestjs/common";
+import { InjectRepository } from "@nestjs/typeorm";
+import { Repository } from "typeorm";
+import { Test, TestStatus } from "../entities/Test/test.entity";
+import { Question, QuestionType } from "../entities/Question/question.entity";
+import { QuestionOption } from "../entities/QuestionOption/questionOption.entity";
+import {
+    TestAttempt,
+    AttemptStatus,
+} from "../entities/TestAttempt/testAttempt.entity";
+import { CreateTestDto } from "../dto/test/create-test.dto";
+import { UpdateTestDto } from "../dto/test/update-test.dto";
+import { User, UserRole } from "../entities/User/user.entity";
 
 @Injectable()
 export class TestService {
@@ -24,15 +31,27 @@ export class TestService {
         private userRepository: Repository<User>,
     ) {}
 
-    async create(createTestDto: CreateTestDto, creatorId: number): Promise<Test> {
+    async create(
+        createTestDto: CreateTestDto,
+        creatorId: number,
+    ): Promise<Test> {
         // Проверяем, что пользователь - учитель или преподаватель
-        const creator = await this.userRepository.findOne({ where: { id: creatorId } });
-        if (!creator || (creator.role !== UserRole.TEACHER && creator.role !== UserRole.PROFESSOR)) {
-            throw new ForbiddenException('Только учителя и преподаватели могут создавать тесты');
+        const creator = await this.userRepository.findOne({
+            where: { id: creatorId },
+        });
+        if (
+            !creator ||
+            (creator.role !== UserRole.TEACHER &&
+                creator.role !== UserRole.PROFESSOR)
+        ) {
+            throw new ForbiddenException(
+                "Только учителя и преподаватели могут создавать тесты",
+            );
         }
 
         // Создаем тест
         const test = this.testRepository.create({
+            // Заполняем основную информацию о тесте из формы
             title: createTestDto.title,
             description: createTestDto.description,
             timeLimit: createTestDto.timeLimit,
@@ -40,9 +59,10 @@ export class TestService {
             status: TestStatus.DRAFT,
         });
 
+        // Сохраняем тест
         const savedTest = await this.testRepository.save(test);
 
-        // Создаем вопросы
+        // Создаем вопросы, информацию о них берем из формы
         for (const questionDto of createTestDto.questions) {
             const question = this.questionRepository.create({
                 text: questionDto.text,
@@ -55,7 +75,11 @@ export class TestService {
             const savedQuestion = await this.questionRepository.save(question);
 
             // Создаем варианты ответов для вопросов с выбором
-            if (questionDto.type === QuestionType.MULTIPLE_CHOICE && questionDto.options) {
+            if (
+                (questionDto.type === QuestionType.MULTIPLE_CHOICE ||
+                    questionDto.type === QuestionType.SINGLE_CHOICE) &&
+                questionDto.options
+            ) {
                 for (const optionDto of questionDto.options) {
                     const option = this.questionOptionRepository.create({
                         text: optionDto.text,
@@ -75,24 +99,28 @@ export class TestService {
     async findAll(creatorId: number): Promise<Test[]> {
         return this.testRepository.find({
             where: { creatorId },
-            relations: ['questions', 'questions.options'],
-            order: { createdAt: 'DESC' },
+            relations: ["questions", "questions.options"],
+            order: { createdAt: "DESC" },
         });
     }
 
     async findOne(id: number, userId?: number): Promise<Test> {
         const test = await this.testRepository.findOne({
             where: { id },
-            relations: ['creator', 'questions', 'questions.options'],
+            relations: ["creator", "questions", "questions.options"],
         });
 
         if (!test) {
-            throw new NotFoundException('Тест не найден');
+            throw new NotFoundException("Тест не найден");
         }
 
         // Если указан userId, проверяем права доступа
-        if (userId && test.creatorId !== userId && test.status === TestStatus.DRAFT) {
-            throw new ForbiddenException('Нет доступа к этому тесту');
+        if (
+            userId &&
+            test.creatorId !== userId &&
+            test.status === TestStatus.DRAFT
+        ) {
+            throw new ForbiddenException("Нет доступа к этому тесту");
         }
 
         return test;
@@ -102,18 +130,18 @@ export class TestService {
     async findOneForStudent(id: number): Promise<Test> {
         const test = await this.testRepository.findOne({
             where: { id, status: TestStatus.ACTIVE },
-            relations: ['creator', 'questions', 'questions.options'],
+            relations: ["creator", "questions", "questions.options"],
         });
 
         if (!test) {
-            throw new NotFoundException('Тест не найден или не активен');
+            throw new NotFoundException("Тест не найден или не активен");
         }
 
         // Убираем правильные ответы из вариантов
         if (test.questions) {
-            test.questions.forEach(question => {
+            test.questions.forEach((question) => {
                 if (question.options) {
-                    question.options.forEach(option => {
+                    question.options.forEach((option) => {
                         option.isCorrect = false; // Скрываем информацию о правильности, но оставляем варианты
                     });
                 }
@@ -125,11 +153,17 @@ export class TestService {
         return test;
     }
 
-    async update(id: number, updateTestDto: UpdateTestDto, creatorId: number): Promise<Test> {
+    async update(
+        id: number,
+        updateTestDto: UpdateTestDto,
+        creatorId: number,
+    ): Promise<Test> {
         const test = await this.findOne(id, creatorId);
 
         if (test.creatorId !== creatorId) {
-            throw new ForbiddenException('Нет прав для редактирования этого теста');
+            throw new ForbiddenException(
+                "Нет прав для редактирования этого теста",
+            );
         }
 
         // Обновляем основную информацию о тесте
@@ -154,10 +188,15 @@ export class TestService {
                     testId: id,
                 });
 
-                const savedQuestion = await this.questionRepository.save(question);
+                const savedQuestion =
+                    await this.questionRepository.save(question);
 
                 // Создаем варианты ответов
-                if (questionDto.type === QuestionType.MULTIPLE_CHOICE && questionDto.options) {
+                if (
+                    (questionDto.type === QuestionType.MULTIPLE_CHOICE ||
+                        questionDto.type === QuestionType.SINGLE_CHOICE) &&
+                    questionDto.options
+                ) {
                     for (const optionDto of questionDto.options) {
                         const option = this.questionOptionRepository.create({
                             text: optionDto.text,
@@ -179,24 +218,33 @@ export class TestService {
         const test = await this.findOne(id, creatorId);
 
         if (test.creatorId !== creatorId) {
-            throw new ForbiddenException('Нет прав для публикации этого теста');
+            throw new ForbiddenException("Нет прав для публикации этого теста");
         }
 
         if (test.status !== TestStatus.DRAFT) {
-            throw new ForbiddenException('Можно публиковать только черновики');
+            throw new ForbiddenException("Можно публиковать только черновики");
         }
 
         // Проверяем, что у теста есть вопросы
         if (!test.questions || test.questions.length === 0) {
-            throw new ForbiddenException('Нельзя публиковать тест без вопросов');
+            throw new ForbiddenException(
+                "Нельзя публиковать тест без вопросов",
+            );
         }
 
         // Проверяем, что у всех вопросов с выбором есть правильные ответы
         for (const question of test.questions) {
-            if (question.type === QuestionType.MULTIPLE_CHOICE) {
-                const hasCorrectOption = question.options?.some(option => option.isCorrect);
+            if (
+                question.type === QuestionType.MULTIPLE_CHOICE ||
+                question.type === QuestionType.SINGLE_CHOICE
+            ) {
+                const hasCorrectOption = question.options?.some(
+                    (option) => option.isCorrect,
+                );
                 if (!hasCorrectOption) {
-                    throw new ForbiddenException(`Вопрос "${question.text}" должен иметь правильный ответ`);
+                    throw new ForbiddenException(
+                        `Вопрос "${question.text}" должен иметь правильный ответ`,
+                    );
                 }
             }
         }
@@ -209,11 +257,15 @@ export class TestService {
         const test = await this.findOne(id, creatorId);
 
         if (test.creatorId !== creatorId) {
-            throw new ForbiddenException('Нет прав для деактивации этого теста');
+            throw new ForbiddenException(
+                "Нет прав для деактивации этого теста",
+            );
         }
 
         if (test.status !== TestStatus.ACTIVE) {
-            throw new ForbiddenException('Можно деактивировать только активные тесты');
+            throw new ForbiddenException(
+                "Можно деактивировать только активные тесты",
+            );
         }
 
         await this.testRepository.update(id, { status: TestStatus.DRAFT });
@@ -224,7 +276,7 @@ export class TestService {
         const test = await this.findOne(id, creatorId);
 
         if (test.creatorId !== creatorId) {
-            throw new ForbiddenException('Нет прав для удаления этого теста');
+            throw new ForbiddenException("Нет прав для удаления этого теста");
         }
 
         await this.testRepository.delete(id);
@@ -234,16 +286,16 @@ export class TestService {
     async findActiveTests(): Promise<Test[]> {
         const tests = await this.testRepository.find({
             where: { status: TestStatus.ACTIVE },
-            relations: ['creator', 'questions', 'questions.options'],
-            order: { createdAt: 'DESC' },
+            relations: ["creator", "questions", "questions.options"],
+            order: { createdAt: "DESC" },
         });
 
         // Убираем правильные ответы из всех тестов
-        tests.forEach(test => {
+        tests.forEach((test) => {
             if (test.questions) {
-                test.questions.forEach(question => {
+                test.questions.forEach((question) => {
                     if (question.options) {
-                        question.options.forEach(option => {
+                        question.options.forEach((option) => {
                             option.isCorrect = false; // Скрываем информацию о правильности
                         });
                     }
@@ -258,40 +310,73 @@ export class TestService {
     // Получение статистики для учителя
     async getTeacherStatistics(creatorId: number) {
         // Проверяем, что пользователь - учитель или преподаватель
-        const creator = await this.userRepository.findOne({ where: { id: creatorId } });
-        if (!creator || (creator.role !== UserRole.TEACHER && creator.role !== UserRole.PROFESSOR)) {
-            throw new ForbiddenException('Только учителя и преподаватели могут получать статистику');
+        const creator = await this.userRepository.findOne({
+            where: { id: creatorId },
+        });
+        if (
+            !creator ||
+            (creator.role !== UserRole.TEACHER &&
+                creator.role !== UserRole.PROFESSOR)
+        ) {
+            throw new ForbiddenException(
+                "Только учителя и преподаватели могут получать статистику",
+            );
         }
 
         // Получаем все тесты учителя
         const tests = await this.testRepository.find({
             where: { creatorId },
-            relations: ['attempts', 'attempts.user'],
+            relations: ["attempts", "attempts.user"],
         });
 
         // Общая статистика по тестам
         const totalTests = tests.length;
-        const activeTests = tests.filter(test => test.status === TestStatus.ACTIVE).length;
-        const draftTests = tests.filter(test => test.status === TestStatus.DRAFT).length;
+        const activeTests = tests.filter(
+            (test) => test.status === TestStatus.ACTIVE,
+        ).length;
+        const draftTests = tests.filter(
+            (test) => test.status === TestStatus.DRAFT,
+        ).length;
 
         // Получаем все попытки прохождения тестов учителя
-        const allAttempts = tests.flatMap(test => test.attempts || []);
-        const completedAttempts = allAttempts.filter(attempt => attempt.status === AttemptStatus.COMPLETED);
+        const allAttempts = tests.flatMap((test) => test.attempts || []);
+        const completedAttempts = allAttempts.filter(
+            (attempt) => attempt.status === AttemptStatus.COMPLETED,
+        );
 
         // Уникальные ученики
-        const uniqueStudents = new Set(allAttempts.map(attempt => attempt.userId));
+        const uniqueStudents = new Set(
+            allAttempts.map((attempt) => attempt.userId),
+        );
         const totalStudents = uniqueStudents.size;
 
         // Средний балл
-        const totalScore = completedAttempts.reduce((sum, attempt) => sum + (attempt.score || 0), 0);
-        const averageScore = completedAttempts.length > 0 ? Math.round((totalScore / completedAttempts.length) * 100) / 100 : 0;
+        const totalScore = completedAttempts.reduce(
+            (sum, attempt) => sum + (attempt.score || 0),
+            0,
+        );
+        const averageScore =
+            completedAttempts.length > 0
+                ? Math.round((totalScore / completedAttempts.length) * 100) /
+                  100
+                : 0;
 
         // Статистика по каждому тесту
-        const testStatistics = tests.map(test => {
+        const testStatistics = tests.map((test) => {
             const testAttempts = test.attempts || [];
-            const testCompletedAttempts = testAttempts.filter(attempt => attempt.status === AttemptStatus.COMPLETED);
-            const testTotalScore = testCompletedAttempts.reduce((sum, attempt) => sum + (attempt.score || 0), 0);
-            const testAverageScore = testCompletedAttempts.length > 0 ? Math.round((testTotalScore / testCompletedAttempts.length) * 100) / 100 : 0;
+            const testCompletedAttempts = testAttempts.filter(
+                (attempt) => attempt.status === AttemptStatus.COMPLETED,
+            );
+            const testTotalScore = testCompletedAttempts.reduce(
+                (sum, attempt) => sum + (attempt.score || 0),
+                0,
+            );
+            const testAverageScore =
+                testCompletedAttempts.length > 0
+                    ? Math.round(
+                          (testTotalScore / testCompletedAttempts.length) * 100,
+                      ) / 100
+                    : 0;
 
             return {
                 id: test.id,
@@ -314,7 +399,11 @@ export class TestService {
                 completedAttempts: completedAttempts.length,
                 averageScore,
             },
-            testStatistics: testStatistics.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()),
+            testStatistics: testStatistics.sort(
+                (a, b) =>
+                    new Date(b.createdAt).getTime() -
+                    new Date(a.createdAt).getTime(),
+            ),
         };
     }
 }

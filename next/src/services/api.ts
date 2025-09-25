@@ -35,7 +35,7 @@ export interface QuestionOption {
 export interface Question {
     id?: number;
     text: string;
-    type: 'multiple_choice' | 'text_input';
+    type: 'single_choice' | 'multiple_choice' | 'text_input';
     order: number;
     correctTextAnswer?: string;
     options?: QuestionOption[];
@@ -328,13 +328,14 @@ class ApiService {
         return response.json();
     }
 
-    async submitAnswer(attemptId: number, questionId: number, selectedOptionId?: number, textAnswer?: string): Promise<TestAnswer> {
+    async submitAnswer(attemptId: number, questionId: number, selectedOptionId?: number, selectedOptionIds?: number[], textAnswer?: string): Promise<TestAnswer> {
         const response = await fetch(`${API_BASE_URL}/test-attempts/${attemptId}/answer`, {
             method: 'POST',
             headers: this.getAuthHeaders(),
             body: JSON.stringify({
                 questionId,
                 selectedOptionId,
+                selectedOptionIds,
                 textAnswer,
             }),
         });
@@ -386,6 +387,6 @@ export const getTeacherStatistics = () => apiService.getTeacherStatistics();
 // Функции для работы с попытками прохождения тестов
 export const startTest = (testId: number) => apiService.startTest(testId);
 export const getAttempt = (attemptId: number) => apiService.getAttempt(attemptId);
-export const submitAnswer = (attemptId: number, questionId: number, selectedOptionId?: number, textAnswer?: string) => 
-    apiService.submitAnswer(attemptId, questionId, selectedOptionId, textAnswer);
+export const submitAnswer = (attemptId: number, questionId: number, selectedOptionId?: number, selectedOptionIds?: number[], textAnswer?: string) => 
+    apiService.submitAnswer(attemptId, questionId, selectedOptionId, selectedOptionIds, textAnswer);
 export const completeTest = (attemptId: number) => apiService.completeTest(attemptId);

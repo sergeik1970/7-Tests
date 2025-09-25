@@ -1,7 +1,15 @@
-import { Injectable, NotFoundException, BadRequestException, ForbiddenException } from "@nestjs/common";
+import {
+    Injectable,
+    NotFoundException,
+    BadRequestException,
+    ForbiddenException,
+} from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from "typeorm";
-import { TestAttempt, AttemptStatus } from "../entities/TestAttempt/testAttempt.entity";
+import {
+    TestAttempt,
+    AttemptStatus,
+} from "../entities/TestAttempt/testAttempt.entity";
 import { TestAnswer } from "../entities/TestAnswer/testAnswer.entity";
 import { Test, TestStatus } from "../entities/Test/test.entity";
 import { Question, QuestionType } from "../entities/Question/question.entity";
@@ -25,7 +33,10 @@ export class TestAttemptService {
         private questionOptionRepository: Repository<QuestionOption>,
     ) {}
 
-    async startTest(startTestDto: StartTestDto, userId: number): Promise<TestAttempt> {
+    async startTest(
+        startTestDto: StartTestDto,
+        userId: number,
+    ): Promise<TestAttempt> {
         const { testId } = startTestDto;
 
         // Проверяем, что тест существует и активен
@@ -54,13 +65,18 @@ export class TestAttemptService {
         if (existingAttempt) {
             // Проверяем, не истекло ли время для существующей попытки
             if (test.timeLimit && existingAttempt.startedAt) {
-                const timeElapsed = (new Date().getTime() - existingAttempt.startedAt.getTime()) / (1000 * 60); // в минутах
+                const timeElapsed =
+                    (new Date().getTime() -
+                        existingAttempt.startedAt.getTime()) /
+                    (1000 * 60); // в минутах
                 if (timeElapsed > test.timeLimit) {
                     // Автоматически завершаем просроченную попытку
                     existingAttempt.status = AttemptStatus.ABANDONED;
                     existingAttempt.completedAt = new Date();
                     await this.testAttemptRepository.save(existingAttempt);
-                    throw new BadRequestException("Время прохождения теста истекло. Начните новую попытку.");
+                    throw new BadRequestException(
+                        "Время прохождения теста истекло. Начните новую попытку.",
+                    );
                 }
             }
             return existingAttempt;
@@ -79,8 +95,13 @@ export class TestAttemptService {
         return await this.testAttemptRepository.save(attempt);
     }
 
-    async submitAnswer(attemptId: number, submitAnswerDto: SubmitAnswerDto, userId: number): Promise<TestAnswer> {
-        const { questionId, selectedOptionId, textAnswer } = submitAnswerDto;
+    async submitAnswer(
+        attemptId: number,
+        submitAnswerDto: SubmitAnswerDto,
+        userId: number,
+    ): Promise<TestAnswer | TestAnswer[]> {
+        const { questionId, selectedOptionId, selectedOptionIds, textAnswer } =
+            submitAnswerDto;
 
         // Проверяем попытку
         const attempt = await this.testAttemptRepository.findOne({
@@ -99,14 +120,18 @@ export class TestAttemptService {
         // Проверяем, не истекло ли время
         if (attempt.test.timeLimit && attempt.startedAt) {
             const currentTime = new Date();
-            const timeElapsed = (currentTime.getTime() - attempt.startedAt.getTime()) / (1000 * 60); // в минутах
-            
+            const timeElapsed =
+                (currentTime.getTime() - attempt.startedAt.getTime()) /
+                (1000 * 60); // в минутах
+
             if (timeElapsed > attempt.test.timeLimit) {
                 // Автоматически завершаем просроченную попытку
                 attempt.status = AttemptStatus.ABANDONED;
                 attempt.completedAt = currentTime;
                 await this.testAttemptRepository.save(attempt);
-                throw new BadRequestException("Время прохождения теста истекло");
+                throw new BadRequestException(
+                    "Время прохождения теста истекло",
+                );
             }
         }
 
@@ -120,50 +145,120 @@ export class TestAttemptService {
             throw new NotFoundException("Вопрос не найден");
         }
 
-        // Проверяем, есть ли уже ответ на этот вопрос
-        let existingAnswer = await this.testAnswerRepository.findOne({
-            where: { attemptId, questionId },
-        });
+        // Удаляем все существующие ответы на этот вопрос
+        await this.testAnswerRepository.delete({ attemptId, questionId });
 
-        let isCorrect = false;
+        if (question.type === QuestionType.TEXT_INPUT && textAnswer) {
+            // Для текстовых вопросов
+            const isCorrect =
+                question.correctTextAnswer?.toLowerCase().trim() ===
+                textAnswer.toLowerCase().trim();
 
-        // Проверяем правильность ответа
-        if (question.type === QuestionType.MULTIPLE_CHOICE && selectedOptionId) {
-            const selectedOption = await this.questionOptionRepository.findOne({
-                where: { id: selectedOptionId, questionId },
-            });
-
-            if (!selectedOption) {
-                throw new BadRequestException("Выбранный вариант не найден");
-            }
-
-            isCorrect = selectedOption.isCorrect;
-        } else if (question.type === QuestionType.TEXT_INPUT && textAnswer) {
-            // Простая проверка текстового ответа (можно улучшить)
-            isCorrect = question.correctTextAnswer?.toLowerCase().trim() === textAnswer.toLowerCase().trim();
-        }
-
-        if (existingAnswer) {
-            // Обновляем существующий ответ
-            existingAnswer.selectedOptionId = selectedOptionId || null;
-            existingAnswer.textAnswer = textAnswer || null;
-            existingAnswer.isCorrect = isCorrect;
-            return await this.testAnswerRepository.save(existingAnswer);
-        } else {
-            // Создаем новый ответ
             const answer = this.testAnswerRepository.create({
                 attemptId,
                 questionId,
-                selectedOptionId: selectedOptionId || null,
-                textAnswer: textAnswer || null,
+                textAnswer,
                 isCorrect,
             });
 
             return await this.testAnswerRepository.save(answer);
+        } else if (question.type === QuestionType.SINGLE_CHOICE) {
+            // Для вопросов с одним правильным ответом
+            if (!selectedOptionId) {
+                // Если ничего не выбрано, создаем пустой ответ
+                const answer = this.testAnswerRepository.create({
+                    attemptId,
+                    questionId,
+                    isCorrect: false,
+                });
+                return await this.testAnswerRepository.save(answer);
+            }
+
+            // Проверяем, что выбранный вариант существует
+            const selectedOption = question.options.find(
+                (option) => option.id === selectedOptionId,
+            );
+            if (!selectedOption) {
+                throw new BadRequestException(
+                    `Выбранный вариант ${selectedOptionId} не найден`,
+                );
+            }
+
+            // Проверяем правильность ответа
+            const isCorrect = selectedOption.isCorrect;
+
+            const answer = this.testAnswerRepository.create({
+                attemptId,
+                questionId,
+                selectedOptionId,
+                isCorrect,
+            });
+
+            return await this.testAnswerRepository.save(answer);
+        } else if (question.type === QuestionType.MULTIPLE_CHOICE) {
+            // Определяем, какие варианты были выбраны
+            const chosenOptionIds =
+                selectedOptionIds ||
+                (selectedOptionId ? [selectedOptionId] : []);
+
+            if (chosenOptionIds.length === 0) {
+                // Если ничего не выбрано, создаем пустой ответ
+                const answer = this.testAnswerRepository.create({
+                    attemptId,
+                    questionId,
+                    isCorrect: false,
+                });
+                return await this.testAnswerRepository.save(answer);
+            }
+
+            // Получаем все правильные варианты для этого вопроса
+            const correctOptions = question.options.filter(
+                (option) => option.isCorrect,
+            );
+            const correctOptionIds = correctOptions.map((option) => option.id);
+
+            // Проверяем правильность ответа:
+            // 1. Все выбранные варианты должны быть правильными
+            // 2. Все правильные варианты должны быть выбраны
+            const isCorrect =
+                chosenOptionIds.length === correctOptionIds.length &&
+                chosenOptionIds.every((id) => correctOptionIds.includes(id)) &&
+                correctOptionIds.every((id) => chosenOptionIds.includes(id));
+
+            // Создаем ответы для каждого выбранного варианта
+            const answers = [];
+            for (const optionId of chosenOptionIds) {
+                const selectedOption = question.options.find(
+                    (option) => option.id === optionId,
+                );
+                if (!selectedOption) {
+                    throw new BadRequestException(
+                        `Выбранный вариант ${optionId} не найден`,
+                    );
+                }
+
+                const answer = this.testAnswerRepository.create({
+                    attemptId,
+                    questionId,
+                    selectedOptionId: optionId,
+                    isCorrect, // Все ответы на вопрос получают одинаковую оценку
+                });
+
+                answers.push(answer);
+            }
+
+            return await this.testAnswerRepository.save(answers);
         }
+
+        throw new BadRequestException(
+            "Неподдерживаемый тип вопроса или отсутствуют данные ответа",
+        );
     }
 
-    async completeTest(attemptId: number, userId: number): Promise<TestAttempt> {
+    async completeTest(
+        attemptId: number,
+        userId: number,
+    ): Promise<TestAttempt> {
         const attempt = await this.testAttemptRepository.findOne({
             where: { id: attemptId, userId },
             relations: ["answers", "test"],
@@ -181,20 +276,47 @@ export class TestAttemptService {
 
         // Проверяем, не истекло ли время (даже при завершении)
         if (attempt.test.timeLimit && attempt.startedAt) {
-            const timeElapsed = (currentTime.getTime() - attempt.startedAt.getTime()) / (1000 * 60); // в минутах
-            
+            const timeElapsed =
+                (currentTime.getTime() - attempt.startedAt.getTime()) /
+                (1000 * 60); // в минутах
+
             if (timeElapsed > attempt.test.timeLimit) {
                 // Завершаем как просроченную попытку
                 attempt.status = AttemptStatus.ABANDONED;
                 attempt.completedAt = currentTime;
                 await this.testAttemptRepository.save(attempt);
-                throw new BadRequestException("Время прохождения теста истекло");
+                throw new BadRequestException(
+                    "Время прохождения теста истекло",
+                );
             }
         }
 
         // Подсчитываем результаты
-        const correctAnswers = attempt.answers.filter(answer => answer.isCorrect).length;
-        const score = attempt.totalQuestions > 0 ? (correctAnswers / attempt.totalQuestions) * 100 : 0;
+        // Группируем ответы по вопросам и считаем правильно отвеченные вопросы
+        const answersByQuestion = attempt.answers.reduce(
+            (acc, answer) => {
+                if (!acc[answer.questionId]) {
+                    acc[answer.questionId] = [];
+                }
+                acc[answer.questionId].push(answer);
+                return acc;
+            },
+            {} as Record<number, typeof attempt.answers>,
+        );
+
+        let correctAnswers = 0;
+        for (const questionId in answersByQuestion) {
+            const questionAnswers = answersByQuestion[questionId];
+            // Если хотя бы один ответ на вопрос правильный, считаем весь вопрос правильным
+            if (questionAnswers.some((answer) => answer.isCorrect)) {
+                correctAnswers++;
+            }
+        }
+
+        const score =
+            attempt.totalQuestions > 0
+                ? (correctAnswers / attempt.totalQuestions) * 100
+                : 0;
 
         // Обновляем попытку с серверным timestamp
         attempt.status = AttemptStatus.COMPLETED;
@@ -205,7 +327,10 @@ export class TestAttemptService {
         return await this.testAttemptRepository.save(attempt);
     }
 
-    async getAttempt(attemptId: number, userId: number): Promise<TestAttempt & { remainingTime?: number }> {
+    async getAttempt(
+        attemptId: number,
+        userId: number,
+    ): Promise<TestAttempt & { remainingTime?: number }> {
         const attempt = await this.testAttemptRepository.findOne({
             where: { id: attemptId, userId },
             relations: [
@@ -223,11 +348,17 @@ export class TestAttemptService {
 
         // Добавляем информацию об оставшемся времени
         let remainingTime: number | undefined;
-        if (attempt.test.timeLimit && attempt.startedAt && attempt.status === AttemptStatus.IN_PROGRESS) {
+        if (
+            attempt.test.timeLimit &&
+            attempt.startedAt &&
+            attempt.status === AttemptStatus.IN_PROGRESS
+        ) {
             const currentTime = new Date();
-            const timeElapsed = (currentTime.getTime() - attempt.startedAt.getTime()) / (1000 * 60); // в минутах
+            const timeElapsed =
+                (currentTime.getTime() - attempt.startedAt.getTime()) /
+                (1000 * 60); // в минутах
             remainingTime = Math.max(0, attempt.test.timeLimit - timeElapsed);
-            
+
             // Если время истекло, автоматически завершаем попытку
             if (remainingTime <= 0) {
                 attempt.status = AttemptStatus.ABANDONED;
@@ -239,9 +370,9 @@ export class TestAttemptService {
         // Если тест еще в процессе, убираем правильные ответы
         if (attempt.status === AttemptStatus.IN_PROGRESS) {
             if (attempt.test.questions) {
-                attempt.test.questions.forEach(question => {
+                attempt.test.questions.forEach((question) => {
                     if (question.options) {
-                        question.options.forEach(option => {
+                        question.options.forEach((option) => {
                             option.isCorrect = false; // Скрываем информацию о правильности
                         });
                     }
@@ -262,7 +393,10 @@ export class TestAttemptService {
     }
 
     // Методы для учителей
-    async getTestAttempts(testId: number, creatorId: number): Promise<TestAttempt[]> {
+    async getTestAttempts(
+        testId: number,
+        creatorId: number,
+    ): Promise<TestAttempt[]> {
         // Проверяем, что тест принадлежит учителю
         const test = await this.testRepository.findOne({
             where: { id: testId, creatorId },
@@ -285,7 +419,10 @@ export class TestAttemptService {
         });
     }
 
-    async getAttemptDetails(attemptId: number, creatorId: number): Promise<TestAttempt> {
+    async getAttemptDetails(
+        attemptId: number,
+        creatorId: number,
+    ): Promise<TestAttempt> {
         const attempt = await this.testAttemptRepository.findOne({
             where: { id: attemptId },
             relations: [
@@ -325,19 +462,26 @@ export class TestAttemptService {
         });
 
         const totalAttempts = attempts.length;
-        const averageScore = totalAttempts > 0 
-            ? attempts.reduce((sum, attempt) => sum + (attempt.score || 0), 0) / totalAttempts 
-            : 0;
+        const averageScore =
+            totalAttempts > 0
+                ? attempts.reduce(
+                      (sum, attempt) => sum + (attempt.score || 0),
+                      0,
+                  ) / totalAttempts
+                : 0;
 
-        const passedAttempts = attempts.filter(attempt => (attempt.score || 0) >= 60).length;
-        const passRate = totalAttempts > 0 ? (passedAttempts / totalAttempts) * 100 : 0;
+        const passedAttempts = attempts.filter(
+            (attempt) => (attempt.score || 0) >= 60,
+        ).length;
+        const passRate =
+            totalAttempts > 0 ? (passedAttempts / totalAttempts) * 100 : 0;
 
         return {
             testId,
             totalAttempts,
             averageScore: Math.round(averageScore * 100) / 100,
             passRate: Math.round(passRate * 100) / 100,
-            attempts: attempts.map(attempt => ({
+            attempts: attempts.map((attempt) => ({
                 id: attempt.id,
                 user: {
                     id: attempt.user.id,
