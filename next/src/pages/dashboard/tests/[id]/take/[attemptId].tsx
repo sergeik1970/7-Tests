@@ -344,11 +344,11 @@ const TakeTestPage = () => {
                         currentQuestion.options &&
                         currentQuestion.options.length > 0 && (
                             <div className={styles.options}>
-                                <div className={styles.choiceHint}>
-                                    {currentQuestion.type === "multiple_choice"
-                                        ? "Выберите один или несколько правильных вариантов ответа"
-                                        : "Выберите один правильный вариант ответа"}
-                                </div>
+                                {currentQuestion.type === "multiple_choice" && (
+                                    <div className={styles.choiceHint}>
+                                        Выберите несколько вариантов ответа
+                                    </div>
+                                )}
                                 <div
                                     style={{
                                         fontSize: "12px",
