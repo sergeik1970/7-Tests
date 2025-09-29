@@ -4,7 +4,7 @@ import DashboardLayout from "@/shared/components/DashboardLayout";
 import Button from "@/shared/components/Button";
 import TestTimer from "@/shared/components/TestTimer";
 import { getAttempt, submitAnswer, completeTest } from "@/services/api";
-import type { TestAttempt, Question } from "@/services/api";
+import type { TestAttempt, Question, TestAnswer } from "@/services/api";
 import styles from "./take-test.module.scss";
 
 const TakeTestPage = () => {
@@ -76,7 +76,7 @@ const TakeTestPage = () => {
             > = {};
 
             // Группируем ответы по вопросам
-            const answersByQuestion: Record<number, (typeof attemptData.answers)[0][]> = {};
+            const answersByQuestion: Record<number, TestAnswer[]> = {};
             attemptData.answers?.forEach((answer) => {
                 if (!answersByQuestion[answer.questionId]) {
                     answersByQuestion[answer.questionId] = [];
@@ -89,8 +89,8 @@ const TakeTestPage = () => {
                 const questionId = parseInt(questionIdStr);
                 const firstAnswer = questionAnswers[0];
 
-                if (firstAnswer.textAnswer) {
-                    // Текстовый ответ
+                if (firstAnswer.textAnswer !== undefined && firstAnswer.textAnswer !== null) {
+                    // Текстовый ответ (включая пустые строки)
                     existingAnswers[questionId] = {
                         textAnswer: firstAnswer.textAnswer,
                     };
@@ -133,12 +133,34 @@ const TakeTestPage = () => {
         }
     };
 
+    // Функция для проверки, действительно ли вопрос отвечен
+    const isQuestionAnswered = (questionId: number): boolean => {
+        const answer = answers[questionId];
+        if (!answer) return false;
+
+        // Для текстовых вопросов проверяем наличие непустого текста
+        if (answer.textAnswer !== undefined) {
+            return typeof answer.textAnswer === "string" && answer.textAnswer.trim().length > 0;
+        }
+
+        // Для вопросов с выбором проверяем наличие выбранных вариантов
+        if (answer.selectedOptionIds && answer.selectedOptionIds.length > 0) {
+            return true;
+        }
+
+        if (answer.selectedOptionId !== undefined) {
+            return true;
+        }
+
+        return false;
+    };
+
     const submitAnswerToServer = useCallback(
         async (
             questionId: number,
             selectedOptionId?: number,
             selectedOptionIds?: number[],
-            textAnswer?: string,
+            textAnswer?: string | null,
         ) => {
             if (!attempt) return;
 
@@ -232,7 +254,9 @@ const TakeTestPage = () => {
 
                 // Устанавливаем новый таймер
                 debounceTimers.current[questionId] = setTimeout(() => {
-                    submitAnswerToServer(questionId, undefined, undefined, textAnswer);
+                    // Если текст пустой, отправляем null вместо пустой строки
+                    const textToSend = textAnswer.trim() === "" ? null : textAnswer;
+                    submitAnswerToServer(questionId, undefined, undefined, textToSend);
                 }, 1000); // Отправляем через 1 секунду после последнего изменения
             }
         },
@@ -485,7 +509,7 @@ const TakeTestPage = () => {
                                 className={`${styles.indicator} ${
                                     index === currentQuestionIndex ? styles.current : ""
                                 } ${
-                                    answers[attempt.test.questions[index].id!]
+                                    isQuestionAnswered(attempt.test.questions[index].id!)
                                         ? styles.answered
                                         : ""
                                 }`}

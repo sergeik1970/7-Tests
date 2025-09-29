@@ -1,0 +1,115 @@
+.option {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.customRadio {
+    width: 20px;
+    height: 20px;
+    border: 2px solid #d1d5db;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    flex-shrink: 0;
+    
+    &:hover:not(.disabled) {
+        border-color: #10b981;
+        box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+    }
+    
+    &.checked {
+        border-color: #10b981;
+        background-color: #10b981;
+        box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+    }
+    
+    &.disabled {
+        border-color: #e5e7eb;
+        background-color: #f9fafb;
+        cursor: not-allowed;
+        opacity: 0.5;
+    }
+}
+
+.radioInner {
+    width: 8px;
+    height: 8px;
+    background-color: white;
+    border-radius: 50%;
+}
+
+.customCheckbox {
+    width: 20px;
+    height: 20px;
+    border: 2px solid #d1d5db;
+    border-radius: 4px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    flex-shrink: 0;
+    
+    &:hover:not(.disabled) {
+        border-color: #10b981;
+        box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+    }
+    
+    &.checked {
+        border-color: #10b981;
+        background-color: #10b981;
+        box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+    }
+    
+    &.disabled {
+        border-color: #e5e7eb;
+        background-color: #f9fafb;
+        cursor: not-allowed;
+        opacity: 0.5;
+    }
+}
+
+.checkboxInner {
+    width: 10px;
+    height: 6px;
+    border: 2px solid white;
+    border-top: none;
+    border-right: none;
+    transform: rotate(-45deg);
+    margin-top: -2px;
+}
+
+// Адаптивность для мобильных устройств
+@media (max-width: 768px) {
+    .option {
+        gap: 8px;
+    }
+    
+    .customRadio,
+    .customCheckbox {
+        width: 18px;
+        height: 18px;
+        
+        &:hover:not(.disabled) {
+            box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.1);
+        }
+        
+        &.checked {
+            box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.1);
+        }
+    }
+    
+    .radioInner {
+        width: 6px;
+        height: 6px;
+    }
+    
+    .checkboxInner {
+        width: 8px;
+        height: 5px;
+    }
+}

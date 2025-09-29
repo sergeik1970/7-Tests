@@ -9,24 +9,24 @@ interface DashboardLayoutProps {
 
 const DashboardLayout = ({ children }: DashboardLayoutProps) => {
     const { user } = useAuth();
-    
+
     // Меню для учителей (создателей тестов)
     const teacherMenuItems = [
         { icon: "🏠", label: "Главная", href: "/dashboard", active: true },
         { icon: "📝", label: "Мои тесты", href: "/dashboard/tests" },
         { icon: "📊", label: "Статистика", href: "/dashboard/statistics" },
         { icon: "👥", label: "Ученики", href: "/dashboard/participants" },
-        { icon: "⚙️", label: "Настройки", href: "/dashboard/settings" }
+        { icon: "⚙️", label: "Настройки", href: "/dashboard/settings" },
     ];
-    
+
     // Меню для учеников
     const studentMenuItems = [
         { icon: "🏠", label: "Главная", href: "/dashboard", active: true },
         { icon: "📝", label: "Доступные тесты", href: "/dashboard/tests" },
         { icon: "📊", label: "Мои результаты", href: "/dashboard/results" },
-        { icon: "⚙️", label: "Настройки", href: "/dashboard/settings" }
+        { icon: "⚙️", label: "Настройки", href: "/dashboard/settings" },
     ];
-    
+
     const menuItems = user?.role && isTeacher(user.role) ? teacherMenuItems : studentMenuItems;
 
     return (
@@ -41,9 +41,9 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
                     <ul className={styles.navList}>
                         {menuItems.map((item, index) => (
                             <li key={index}>
-                                <a 
-                                    href={item.href} 
-                                    className={`${styles.navItem} ${item.active ? styles.active : ''}`}
+                                <a
+                                    href={item.href}
+                                    className={`${styles.navItem} ${item.active ? styles.active : ""}`}
                                 >
                                     <span className={styles.navIcon}>{item.icon}</span>
                                     <span className={styles.navLabel}>{item.label}</span>
@@ -55,9 +55,9 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
                 <div className={styles.user}>
                     <div className={styles.userAvatar}>👤</div>
                     <div className={styles.userInfo}>
-                        <div className={styles.userName}>{user?.name || 'Пользователь'}</div>
+                        <div className={styles.userName}>{user?.name || "Пользователь"}</div>
                         <div className={styles.userRole}>
-                            {user?.role ? getRoleDisplayName(user.role) : 'Пользователь'}
+                            {user?.role ? getRoleDisplayName(user.role) : "Пользователь"}
                         </div>
                     </div>
                 </div>
@@ -71,9 +71,7 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
                         </button>
                     </div>
                 </header>
-                <div className={styles.content}>
-                    {children}
-                </div>
+                <div className={styles.content}>{children}</div>
             </main>
         </div>
     );

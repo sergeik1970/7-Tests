@@ -14,7 +14,7 @@ const TestResultsPage = () => {
     const [error, setError] = useState("");
 
     useEffect(() => {
-        if (attemptId && typeof attemptId === 'string') {
+        if (attemptId && typeof attemptId === "string") {
             loadAttempt(parseInt(attemptId));
         }
     }, [attemptId]);
@@ -61,9 +61,7 @@ const TestResultsPage = () => {
                 <div className={styles.error}>
                     <h2>Ошибка</h2>
                     <p>{error || "Результаты не найдены"}</p>
-                    <Button onClick={() => router.push('/dashboard')}>
-                        Вернуться к панели
-                    </Button>
+                    <Button onClick={() => router.push("/dashboard")}>Вернуться к панели</Button>
                 </div>
             </DashboardLayout>
         );
@@ -86,34 +84,41 @@ const TestResultsPage = () => {
                         <div className={styles.scoreValue}>{Math.round(score)}%</div>
                         <div className={styles.scoreText}>{getScoreText(score)}</div>
                     </div>
-                    
+
                     <div className={styles.scoreDetails}>
                         <div className={styles.scoreItem}>
                             <span className={styles.label}>Правильных ответов:</span>
-                            <span className={styles.value}>{correctAnswers} из {totalQuestions}</span>
+                            <span className={styles.value}>
+                                {correctAnswers} из {totalQuestions}
+                            </span>
                         </div>
-                        
+
                         <div className={styles.scoreItem}>
                             <span className={styles.label}>Время начала:</span>
                             <span className={styles.value}>
-                                {new Date(attempt.startedAt).toLocaleString('ru-RU')}
+                                {new Date(attempt.startedAt).toLocaleString("ru-RU")}
                             </span>
                         </div>
-                        
+
                         {attempt.completedAt && (
                             <div className={styles.scoreItem}>
                                 <span className={styles.label}>Время завершения:</span>
                                 <span className={styles.value}>
-                                    {new Date(attempt.completedAt).toLocaleString('ru-RU')}
+                                    {new Date(attempt.completedAt).toLocaleString("ru-RU")}
                                 </span>
                             </div>
                         )}
-                        
+
                         <div className={styles.scoreItem}>
                             <span className={styles.label}>Статус:</span>
-                            <span className={`${styles.value} ${styles.status} ${styles[attempt.status]}`}>
-                                {attempt.status === 'completed' ? 'Завершен' : 
-                                 attempt.status === 'abandoned' ? 'Прерван' : 'В процессе'}
+                            <span
+                                className={`${styles.value} ${styles.status} ${styles[attempt.status]}`}
+                            >
+                                {attempt.status === "completed"
+                                    ? "Завершен"
+                                    : attempt.status === "abandoned"
+                                      ? "Прерван"
+                                      : "В процессе"}
                             </span>
                         </div>
                     </div>
@@ -122,55 +127,76 @@ const TestResultsPage = () => {
                 {attempt.answers && attempt.answers.length > 0 && (
                     <div className={styles.answersSection}>
                         <h3 className={styles.sectionTitle}>Детальные результаты</h3>
-                        
+
                         <div className={styles.answersList}>
                             {attempt.test.questions.map((question, index) => {
-                                const answer = attempt.answers?.find(a => a.questionId === question.id);
+                                const answer = attempt.answers?.find(
+                                    (a) => a.questionId === question.id,
+                                );
                                 const isCorrect = answer?.isCorrect || false;
-                                
+
                                 return (
-                                    <div key={question.id} className={`${styles.answerCard} ${isCorrect ? styles.correct : styles.incorrect}`}>
+                                    <div
+                                        key={question.id}
+                                        className={`${styles.answerCard} ${isCorrect ? styles.correct : styles.incorrect}`}
+                                    >
                                         <div className={styles.questionHeader}>
-                                            <span className={styles.questionNumber}>Вопрос {index + 1}</span>
-                                            <span className={`${styles.resultBadge} ${isCorrect ? styles.correct : styles.incorrect}`}>
-                                                {isCorrect ? '✓ Правильно' : '✗ Неправильно'}
+                                            <span className={styles.questionNumber}>
+                                                Вопрос {index + 1}
+                                            </span>
+                                            <span
+                                                className={`${styles.resultBadge} ${isCorrect ? styles.correct : styles.incorrect}`}
+                                            >
+                                                {isCorrect ? "✓ Правильно" : "✗ Неправильно"}
                                             </span>
                                         </div>
-                                        
+
                                         <p className={styles.questionText}>{question.text}</p>
-                                        
-                                        {question.type === 'multiple_choice' && (
+
+                                        {question.type === "multiple_choice" && (
                                             <div className={styles.options}>
                                                 {question.options?.map((option, optionIndex) => {
-                                                    const isSelected = answer?.selectedOptionId === option.id;
+                                                    const isSelected =
+                                                        answer?.selectedOptionId === option.id;
                                                     const isCorrectOption = option.isCorrect;
-                                                    
+
                                                     return (
-                                                        <div 
+                                                        <div
                                                             key={optionIndex}
                                                             className={`${styles.option} ${
-                                                                isSelected ? styles.selected : ''
+                                                                isSelected ? styles.selected : ""
                                                             } ${
-                                                                isCorrectOption ? styles.correctOption : ''
+                                                                isCorrectOption
+                                                                    ? styles.correctOption
+                                                                    : ""
                                                             }`}
                                                         >
                                                             <span className={styles.optionMarker}>
-                                                                {isSelected && isCorrectOption ? '✓' :
-                                                                 isSelected && !isCorrectOption ? '✗' :
-                                                                 !isSelected && isCorrectOption ? '✓' : '○'}
+                                                                {isSelected && isCorrectOption
+                                                                    ? "✓"
+                                                                    : isSelected && !isCorrectOption
+                                                                      ? "✗"
+                                                                      : !isSelected &&
+                                                                          isCorrectOption
+                                                                        ? "✓"
+                                                                        : "○"}
                                                             </span>
-                                                            <span className={styles.optionText}>{option.text}</span>
+                                                            <span className={styles.optionText}>
+                                                                {option.text}
+                                                            </span>
                                                         </div>
                                                     );
                                                 })}
                                             </div>
                                         )}
-                                        
-                                        {question.type === 'text_input' && (
+
+                                        {question.type === "text_input" && (
                                             <div className={styles.textAnswer}>
                                                 <div className={styles.answerRow}>
                                                     <strong>Ваш ответ:</strong>
-                                                    <span>{answer?.textAnswer || 'Не отвечено'}</span>
+                                                    <span>
+                                                        {answer?.textAnswer || "Не отвечено"}
+                                                    </span>
                                                 </div>
                                                 {question.correctTextAnswer && (
                                                     <div className={styles.answerRow}>
@@ -188,14 +214,11 @@ const TestResultsPage = () => {
                 )}
 
                 <div className={styles.actions}>
-                    <Button 
-                        variant="primary"
-                        onClick={() => router.push('/dashboard')}
-                    >
+                    <Button variant="primary" onClick={() => router.push("/dashboard")}>
                         Вернуться к панели
                     </Button>
-                    
-                    <Button 
+
+                    <Button
                         variant="outline"
                         onClick={() => router.push(`/dashboard/tests/${attempt.testId}`)}
                     >

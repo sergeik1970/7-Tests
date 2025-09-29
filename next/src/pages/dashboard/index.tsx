@@ -35,24 +35,24 @@ const DashboardPage = () => {
     const getStats = () => {
         if (user?.role && isTeacher(user.role)) {
             const totalTests = tests.length;
-            const activeTests = tests.filter(test => test.status === 'active').length;
-            const draftTests = tests.filter(test => test.status === 'draft').length;
-            const completedTests = tests.filter(test => test.status === 'completed').length;
+            const activeTests = tests.filter((test) => test.status === "active").length;
+            const draftTests = tests.filter((test) => test.status === "draft").length;
+            const completedTests = tests.filter((test) => test.status === "completed").length;
 
             return [
                 { title: "Мои тесты", value: totalTests.toString(), icon: "📝" },
                 { title: "Активных тестов", value: activeTests.toString(), icon: "🟢" },
                 { title: "Черновиков", value: draftTests.toString(), icon: "📄" },
-                { title: "Завершенных тестов", value: completedTests.toString(), icon: "✅" }
+                { title: "Завершенных тестов", value: completedTests.toString(), icon: "✅" },
             ];
         } else {
-            const availableTests = tests.filter(test => test.status === 'active').length;
-            
+            const availableTests = tests.filter((test) => test.status === "active").length;
+
             return [
                 { title: "Доступно тестов", value: availableTests.toString(), icon: "📝" },
                 { title: "Пройдено", value: "0", icon: "✅" },
                 { title: "Средний балл", value: "-", icon: "📊" },
-                { title: "Лучший результат", value: "-", icon: "🏆" }
+                { title: "Лучший результат", value: "-", icon: "🏆" },
             ];
         }
     };
@@ -64,12 +64,12 @@ const DashboardPage = () => {
             <div className={styles.dashboard}>
                 <div className={styles.header}>
                     <h1 className={styles.title}>
-                        {user?.role ? getDashboardTitle(user.role) : 'Панель пользователя'}
+                        {user?.role ? getDashboardTitle(user.role) : "Панель пользователя"}
                     </h1>
                     {user?.role && isTeacher(user.role) && (
-                        <Button 
+                        <Button
                             variant="primary"
-                            onClick={() => router.push('/dashboard/tests/create')}
+                            onClick={() => router.push("/dashboard/tests/create")}
                         >
                             Создать новый тест
                         </Button>
@@ -91,22 +91,18 @@ const DashboardPage = () => {
                 <div className={styles.section}>
                     <div className={styles.sectionHeader}>
                         <h2 className={styles.sectionTitle}>
-                            {user?.role && isTeacher(user.role) ? 'Мои тесты' : 'Доступные тесты'}
+                            {user?.role && isTeacher(user.role) ? "Мои тесты" : "Доступные тесты"}
                         </h2>
-                        <Button 
-                            variant="outline" 
+                        <Button
+                            variant="outline"
                             size="small"
-                            onClick={() => router.push('/dashboard/tests')}
+                            onClick={() => router.push("/dashboard/tests")}
                         >
                             Все тесты
                         </Button>
                     </div>
 
-                    {error && (
-                        <div className={styles.error}>
-                            {error}
-                        </div>
-                    )}
+                    {error && <div className={styles.error}>{error}</div>}
 
                     {isLoading ? (
                         <div className={styles.loading}>
@@ -116,15 +112,14 @@ const DashboardPage = () => {
                         <div className={styles.emptyState}>
                             <p>
                                 {user?.role && isTeacher(user.role)
-                                    ? 'У вас пока нет тестов' 
-                                    : 'Нет доступных тестов'
-                                }
+                                    ? "У вас пока нет тестов"
+                                    : "Нет доступных тестов"}
                             </p>
                             {user?.role && isTeacher(user.role) && (
-                                <Button 
+                                <Button
                                     variant="primary"
                                     size="small"
-                                    onClick={() => router.push('/dashboard/tests/create')}
+                                    onClick={() => router.push("/dashboard/tests/create")}
                                 >
                                     Создать первый тест
                                 </Button>
@@ -137,31 +132,38 @@ const DashboardPage = () => {
                                     <div className={styles.testInfo}>
                                         <h3 className={styles.testName}>{test.title}</h3>
                                         {test.description && (
-                                            <p className={styles.testDescription}>{test.description}</p>
+                                            <p className={styles.testDescription}>
+                                                {test.description}
+                                            </p>
                                         )}
                                         <div className={styles.testMeta}>
                                             <span>📝 {test.questions.length} вопросов</span>
-                                            {test.timeLimit && (
-                                                <span>⏱️ {test.timeLimit} мин</span>
-                                            )}
-                                            {test.creator && user?.role && !isTeacher(user.role) && (
-                                                <span>👨‍🏫 {test.creator.name}</span>
-                                            )}
+                                            {test.timeLimit && <span>⏱️ {test.timeLimit} мин</span>}
+                                            {test.creator &&
+                                                user?.role &&
+                                                !isTeacher(user.role) && (
+                                                    <span>👨‍🏫 {test.creator.name}</span>
+                                                )}
                                         </div>
                                     </div>
                                     <div className={styles.testActions}>
                                         <span className={`${styles.status} ${styles[test.status]}`}>
-                                            {test.status === 'active' && 'Активный'}
-                                            {test.status === 'completed' && 'Завершен'}
-                                            {test.status === 'draft' && 'Черновик'}
+                                            {test.status === "active" && "Активный"}
+                                            {test.status === "completed" && "Завершен"}
+                                            {test.status === "draft" && "Черновик"}
                                         </span>
-                                        <Button 
-                                            variant="outline" 
+                                        <Button
+                                            variant="outline"
                                             size="small"
-                                            onClick={() => router.push(`/dashboard/tests/${test.id}`)}
+                                            onClick={() =>
+                                                router.push(`/dashboard/tests/${test.id}`)
+                                            }
                                         >
-                                            {user?.role && isTeacher(user.role) ? 'Управлять' : 
-                                             test.status === 'active' ? 'Пройти' : 'Просмотр'}
+                                            {user?.role && isTeacher(user.role)
+                                                ? "Управлять"
+                                                : test.status === "active"
+                                                  ? "Пройти"
+                                                  : "Просмотр"}
                                         </Button>
                                     </div>
                                 </div>

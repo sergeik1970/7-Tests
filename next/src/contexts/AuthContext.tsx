@@ -1,5 +1,5 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { apiService, User } from '@/services/api';
+import React, { createContext, useContext, useState, useEffect, ReactNode } from "react";
+import { apiService, User } from "@/services/api";
 
 interface AuthContextType {
     user: User | null;
@@ -11,7 +11,7 @@ interface AuthContextType {
         email: string;
         password: string;
         confirmPassword: string;
-        role?: 'pupil' | 'teacher' | 'student' | 'professor';
+        role?: "pupil" | "teacher" | "student" | "professor";
     }) => Promise<void>;
     logout: () => void;
 }
@@ -21,7 +21,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const useAuth = () => {
     const context = useContext(AuthContext);
     if (context === undefined) {
-        throw new Error('useAuth must be used within an AuthProvider');
+        throw new Error("useAuth must be used within an AuthProvider");
     }
     return context;
 };
@@ -38,11 +38,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         // Проверяем, есть ли сохраненный пользователь при загрузке
         const savedUser = apiService.getCurrentUser();
         const token = apiService.getToken();
-        
+
         if (savedUser && token) {
             setUser(savedUser);
         }
-        
+
         setIsLoading(false);
     }, []);
 
@@ -56,7 +56,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         email: string;
         password: string;
         confirmPassword: string;
-        role?: 'pupil' | 'teacher' | 'student' | 'professor';
+        role?: "pupil" | "teacher" | "student" | "professor";
     }) => {
         const response = await apiService.register(userData);
         setUser(response.user);
@@ -76,9 +76,5 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         logout,
     };
 
-    return (
-        <AuthContext.Provider value={value}>
-            {children}
-        </AuthContext.Provider>
-    );
+    return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
