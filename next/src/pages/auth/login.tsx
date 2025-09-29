@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useRouter } from "next/router";
 import Button from "@/shared/components/Button";
 import InputText from "@/shared/components/InputText";
+import FormField from "@/shared/components/FormField";
 import AuthNavigation from "@/shared/components/AuthNavigation";
 import { useAuth } from "@/contexts/AuthContext";
 import styles from "./auth.module.scss";
@@ -48,29 +49,23 @@ const LoginPage = () => {
                         </div>
                     )}
 
-                    <div className={styles.field}>
-                        <label className={styles.label}>Email</label>
-                        <InputText
-                            type="email"
-                            value={email}
-                            onChange={(e) => setEmail(e.target.value)}
-                            placeholder="Введите ваш email"
-                            required
-                            disabled={isLoading}
-                        />
-                    </div>
+                    <FormField
+                        label="Email"
+                        type="email"
+                        value={email}
+                        onChange={setEmail}
+                        placeholder="Введите ваш email"
+                        required
+                    />
 
-                    <div className={styles.field}>
-                        <label className={styles.label}>Пароль</label>
-                        <InputText
-                            type="password"
-                            value={password}
-                            onChange={(e) => setPassword(e.target.value)}
-                            placeholder="Введите пароль"
-                            required
-                            disabled={isLoading}
-                        />
-                    </div>
+                    <FormField
+                        label="Пароль"
+                        type="password"
+                        value={password}
+                        onChange={setPassword}
+                        placeholder="Введите пароль"
+                        required
+                    />
 
                     <Button 
                         variant="primary" 

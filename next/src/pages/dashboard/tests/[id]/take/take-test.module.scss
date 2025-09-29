@@ -26,9 +26,8 @@
     color: #333;
 }
 
-.progress {
-    font-size: 14px;
-    color: #666;
+.progressComponent {
+    margin-top: 8px;
 }
 
 .timer {
@@ -52,235 +51,13 @@
     font-size: 14px;
 }
 
-.questionCard {
-    background: white;
-    border: 1px solid #e0e0e0;
-    border-radius: 12px;
-    padding: 30px;
-    margin-bottom: 30px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    position: relative;
-}
+// Стили для отображения вопроса теперь в компоненте QuestionDisplay
 
-.questionText {
-    font-size: 18px;
-    font-weight: 500;
-    margin: 0 0 24px 0;
-    color: #333;
-    line-height: 1.5;
-}
 
-.options {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-}
 
-.choiceHint {
-    background: #f0f9ff;
-    border: 1px solid #0ea5e9;
-    border-radius: 6px;
-    padding: 8px 12px;
-    font-size: 14px;
-    color: #0369a1;
-    font-weight: 500;
-    margin-bottom: 8px;
-    text-align: center;
-}
 
-.optionLabel {
-    display: flex;
-    align-items: center;
-    padding: 16px;
-    border: 2px solid #e0e0e0;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    position: relative;
-    
-    &:hover {
-        border-color: #10b981;
-        background: #f0fdf4;
-    }
-    
-    input[type="checkbox"], input[type="radio"] {
-        appearance: none;
-        width: 20px;
-        height: 20px;
-        border: 2px solid #d1d5db;
-        margin-right: 12px;
-        position: relative;
-        cursor: pointer;
-        transition: all 0.2s ease;
-        background: white;
-        
-        &:hover {
-            border-color: #10b981;
-        }
-        
-        &:checked {
-            background: #10b981;
-            border-color: #10b981;
-        }
-    }
-    
-    // Стили для чекбоксов (квадратные с галочкой)
-    input[type="checkbox"] {
-        border-radius: 4px;
-        
-        &:checked::after {
-            content: '✓';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            color: white;
-            font-size: 12px;
-            font-weight: bold;
-        }
-    }
-    
-    // Стили для радиокнопок (круглые с точкой)
-    input[type="radio"] {
-        border-radius: 50%;
-        
-        &:checked::after {
-            content: '';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 8px;
-            height: 8px;
-            background: white;
-            border-radius: 50%;
-        }
-    }
-    
-    input[type="checkbox"]:checked + .optionText,
-    input[type="radio"]:checked + .optionText {
-        font-weight: 500;
-        color: #0369a1;
-    }
-}
 
-.optionText {
-    flex: 1;
-    font-size: 16px;
-    color: #333;
-}
 
-.textInput {
-    textarea {
-        width: 100%;
-        min-height: 120px;
-        padding: 16px;
-        border: 2px solid #e0e0e0;
-        border-radius: 8px;
-        font-size: 16px;
-        font-family: inherit;
-        resize: vertical;
-        transition: border-color 0.2s ease;
-        
-        &:focus {
-            outline: none;
-            border-color: #0ea5e9;
-        }
-        
-        &::placeholder {
-            color: #999;
-        }
-        
-        &:disabled {
-            background: #f5f5f5;
-            cursor: not-allowed;
-        }
-    }
-}
-
-.questionSavingIndicator {
-    position: absolute;
-    bottom: 16px;
-    right: 16px;
-    font-size: 12px;
-    font-weight: 500;
-    padding: 6px 12px;
-    border-radius: 20px;
-    transition: all 0.3s ease;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    
-    &.saving {
-        background: #fef3c7;
-        color: #92400e;
-        border: 1px solid #f59e0b;
-    }
-    
-    &.saved {
-        background: #dcfce7;
-        color: #166534;
-        border: 1px solid #10b981;
-    }
-    
-    &.error {
-        background: #fecaca;
-        color: #dc2626;
-        border: 1px solid #ef4444;
-    }
-}
-
-.navigation {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 20px;
-}
-
-.questionIndicators {
-    display: flex;
-    gap: 8px;
-    flex-wrap: wrap;
-    justify-content: center;
-}
-
-.indicator {
-    width: 40px;
-    height: 40px;
-    border: 2px solid #e0e0e0;
-    border-radius: 50%;
-    background: white;
-    color: #666;
-    font-size: 14px;
-    font-weight: 500;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    
-    &:hover {
-        border-color: #0ea5e9;
-        background: #f0f9ff;
-    }
-    
-    &.current {
-        border-color: #0ea5e9;
-        background: #0ea5e9;
-        color: white;
-    }
-    
-    &.answered {
-        border-color: #10b981;
-        background: #10b981;
-        color: white;
-        
-        &.current {
-            border-color: #0ea5e9;
-            background: #0ea5e9;
-        }
-    }
-    
-    &:disabled {
-        opacity: 0.5;
-        cursor: not-allowed;
-    }
-}
 
 @media (max-width: 768px) {
     .takeTest {
@@ -296,24 +73,5 @@
     .timer {
         display: flex;
         justify-content: center;
-    }
-    
-    .questionCard {
-        padding: 20px;
-    }
-    
-    .questionSavingIndicator {
-        position: static;
-        margin-top: 16px;
-        text-align: center;
-    }
-    
-    .navigation {
-        flex-direction: column;
-        gap: 16px;
-    }
-    
-    .questionIndicators {
-        order: -1;
     }
 }

@@ -2,7 +2,12 @@ import React, { useState, useEffect, useCallback, useRef } from "react";
 import { useRouter } from "next/router";
 import DashboardLayout from "@/shared/components/DashboardLayout";
 import Button from "@/shared/components/Button";
+import LoadingState from "@/shared/components/LoadingState";
+import ErrorState from "@/shared/components/ErrorState";
 import TestTimer from "@/shared/components/TestTimer";
+import TestProgress from "@/shared/components/TestProgress";
+import QuestionDisplay from "@/shared/components/QuestionDisplay";
+import QuestionNavigation from "@/shared/components/QuestionNavigation";
 import { getAttempt, submitAnswer, completeTest } from "@/services/api";
 import type { TestAttempt, Question, TestAnswer } from "@/services/api";
 import styles from "./take-test.module.scss";
@@ -171,7 +176,7 @@ const TakeTestPage = () => {
                     questionId,
                     selectedOptionId,
                     selectedOptionIds,
-                    textAnswer,
+                    textAnswer || undefined,
                 );
                 setSavingStatus((prev) => ({ ...prev, [questionId]: "saved" }));
 
@@ -208,7 +213,7 @@ const TakeTestPage = () => {
             });
             console.log("Current answers state:", answers[questionId]);
 
-            let newAnswerData;
+            let newAnswerData: { selectedOptionIds?: number[]; textAnswer?: string } | undefined;
 
             if (selectedOptionId !== undefined) {
                 // Для чекбоксов (и одиночный, и множественный выбор)
@@ -243,7 +248,7 @@ const TakeTestPage = () => {
                 // Обновляем локальное состояние
                 setAnswers((prev) => ({
                     ...prev,
-                    [questionId]: newAnswerData,
+                    [questionId]: newAnswerData!,
                 }));
 
                 // Для текстовых ответов используем debounce
@@ -273,43 +278,11 @@ const TakeTestPage = () => {
     }, []);
 
     const currentQuestion = attempt?.test.questions[currentQuestionIndex];
-    const isLastQuestion = currentQuestionIndex === (attempt?.test.questions.length || 0) - 1;
-    const isFirstQuestion = currentQuestionIndex === 0;
-
-    // Получаем текущие ответы пользователя
-    const currentAnswers = answers[currentQuestion?.id!]?.selectedOptionIds || [];
-
-    // Подсчитываем правильные ответы для отладки
-    const correctAnswers = currentQuestion?.options?.filter((opt) => opt.isCorrect) || [];
-    const correctAnswersCount = correctAnswers.length;
-
-    // Отладочная информация
-    console.log("=== DEBUG INFO ===");
-    console.log("Current question:", currentQuestion?.text);
-    console.log("Question type:", currentQuestion?.type);
-    console.log("Question ID:", currentQuestion?.id);
-    console.log("Current answers:", currentAnswers);
-    console.log("Current answers count:", currentAnswers.length);
-    console.log("Correct answers count:", correctAnswersCount);
-    console.log("Question options:", currentQuestion?.options);
-    console.log("Question options length:", currentQuestion?.options?.length);
-    console.log(
-        "Options with correct flags:",
-        currentQuestion?.options?.map((opt) => ({
-            id: opt.id,
-            text: opt.text,
-            isCorrect: opt.isCorrect,
-        })),
-    );
-    console.log("Full question object:", currentQuestion);
-    console.log("==================");
 
     if (isLoading) {
         return (
             <DashboardLayout>
-                <div className={styles.loading}>
-                    <p>Загрузка теста...</p>
-                </div>
+                <LoadingState message="Загрузка теста..." />
             </DashboardLayout>
         );
     }
@@ -317,11 +290,12 @@ const TakeTestPage = () => {
     if (error || !attempt || !currentQuestion) {
         return (
             <DashboardLayout>
-                <div className={styles.error}>
-                    <h2>Ошибка</h2>
-                    <p>{error || "Тест не найден"}</p>
-                    <Button onClick={() => router.push("/dashboard")}>Вернуться к панели</Button>
-                </div>
+                <ErrorState
+                    title="Ошибка"
+                    message={error || "Тест не найден"}
+                    actionText="Вернуться к панели"
+                    onAction={() => router.push("/dashboard")}
+                />
             </DashboardLayout>
         );
     }
@@ -329,11 +303,14 @@ const TakeTestPage = () => {
     if (attempt.status !== "in_progress") {
         return (
             <DashboardLayout>
-                <div className={styles.completed}>
-                    <h2>Тест завершен</h2>
-                    <p>Этот тест уже был завершен.</p>
-                    <Button onClick={() => router.push("/dashboard")}>Вернуться к панели</Button>
-                </div>
+                <ErrorState
+                    title="Тест завершен"
+                    message="Этот тест уже был завершен."
+                    actionText="Вернуться к панели"
+                    onAction={() => router.push("/dashboard")}
+                    variant="info"
+                    showIcon={false}
+                />
             </DashboardLayout>
         );
     }
@@ -344,9 +321,11 @@ const TakeTestPage = () => {
                 <div className={styles.header}>
                     <div className={styles.testInfo}>
                         <h1 className={styles.title}>{attempt.test.title}</h1>
-                        <div className={styles.progress}>
-                            Вопрос {currentQuestionIndex + 1} из {attempt.test.questions.length}
-                        </div>
+                        <TestProgress
+                            currentQuestion={currentQuestionIndex + 1}
+                            totalQuestions={attempt.test.questions.length}
+                            className={styles.progressComponent}
+                        />
                     </div>
 
                     {timeLeft !== null && attempt.test.timeLimit && (
@@ -360,183 +339,34 @@ const TakeTestPage = () => {
 
                 {error && <div className={styles.errorMessage}>{error}</div>}
 
-                <div className={styles.questionCard}>
-                    <h2 className={styles.questionText}>{currentQuestion.text}</h2>
+                <QuestionDisplay
+                    question={currentQuestion}
+                    answers={answers[currentQuestion.id!] || {}}
+                    onAnswerChange={(selectedOptionId, selectedOptionIds, textAnswer) =>
+                        handleAnswerChange(
+                            currentQuestion.id!,
+                            selectedOptionId,
+                            selectedOptionIds,
+                            textAnswer,
+                            currentQuestion.type,
+                        )
+                    }
+                    savingStatus={savingStatus[currentQuestion.id!]}
+                    showDebugInfo={true}
+                />
 
-                    {(currentQuestion.type === "single_choice" ||
-                        currentQuestion.type === "multiple_choice") &&
-                        currentQuestion.options &&
-                        currentQuestion.options.length > 0 && (
-                            <div className={styles.options}>
-                                {currentQuestion.type === "multiple_choice" && (
-                                    <div className={styles.choiceHint}>
-                                        Выберите несколько вариантов ответа
-                                    </div>
-                                )}
-                                <div
-                                    style={{
-                                        fontSize: "12px",
-                                        color: "#666",
-                                        marginBottom: "10px",
-                                        background: "#f0f0f0",
-                                        padding: "5px",
-                                        border: "1px solid #ccc",
-                                    }}
-                                >
-                                    <strong>DEBUG INFO:</strong>
-                                    <br />
-                                    questionType = "{currentQuestion.type}" <br />
-                                    questionId = {currentQuestion.id} <br />
-                                    selectedAnswersCount = {currentAnswers.length} <br />
-                                    correctAnswersCount = {correctAnswersCount} <br />
-                                    optionsLength = {currentQuestion.options?.length || 0} <br />
-                                    hasOptions = {currentQuestion.options ? "true" : "false"} <br />
-                                    Correct answers:{" "}
-                                    {correctAnswers.map((opt) => opt.text).join(", ") ||
-                                        "none"}{" "}
-                                    <br />
-                                    All options:{" "}
-                                    {currentQuestion.options
-                                        ?.map((opt) => `${opt.text}(${opt.isCorrect ? "✓" : "✗"})`)
-                                        .join(", ") || "NO OPTIONS"}{" "}
-                                    <br />
-                                    Input type will be:{" "}
-                                    {currentQuestion.type === "multiple_choice"
-                                        ? "checkbox"
-                                        : "radio"}
-                                </div>
-
-                                {currentQuestion.options.map((option, index) => (
-                                    <label key={index} className={styles.optionLabel}>
-                                        <input
-                                            type={
-                                                currentQuestion.type === "multiple_choice"
-                                                    ? "checkbox"
-                                                    : "radio"
-                                            }
-                                            name={
-                                                currentQuestion.type === "multiple_choice"
-                                                    ? undefined
-                                                    : `question-${currentQuestion.id}`
-                                            }
-                                            value={option.id}
-                                            checked={(
-                                                answers[currentQuestion.id!]?.selectedOptionIds ||
-                                                []
-                                            ).includes(option.id)}
-                                            onChange={() =>
-                                                handleAnswerChange(
-                                                    currentQuestion.id!,
-                                                    option.id,
-                                                    undefined,
-                                                    undefined,
-                                                    currentQuestion.type,
-                                                )
-                                            }
-                                        />
-                                        <span className={styles.optionText}>{option.text}</span>
-                                    </label>
-                                ))}
-                            </div>
-                        )}
-
-                    {/* Отладочная информация для случаев, когда варианты не показываются */}
-                    {(currentQuestion.type === "single_choice" ||
-                        currentQuestion.type === "multiple_choice") &&
-                        (!currentQuestion.options || currentQuestion.options.length === 0) && (
-                            <div
-                                style={{
-                                    background: "#ffebee",
-                                    border: "1px solid #f44336",
-                                    padding: "10px",
-                                    color: "#d32f2f",
-                                    marginBottom: "10px",
-                                }}
-                            >
-                                <strong>⚠️ ПРОБЛЕМА: Варианты ответов не найдены!</strong>
-                                <br />
-                                questionType = "{currentQuestion.type}" <br />
-                                hasOptions = {currentQuestion.options ? "true" : "false"} <br />
-                                optionsLength = {currentQuestion.options?.length || 0} <br />
-                                options = {JSON.stringify(currentQuestion.options)}
-                            </div>
-                        )}
-
-                    {currentQuestion.type === "text_input" && (
-                        <div className={styles.textInput}>
-                            <textarea
-                                value={answers[currentQuestion.id!]?.textAnswer || ""}
-                                onChange={(e) =>
-                                    handleAnswerChange(
-                                        currentQuestion.id!,
-                                        undefined,
-                                        undefined,
-                                        e.target.value,
-                                    )
-                                }
-                                placeholder="Введите ваш ответ..."
-                                rows={4}
-                            />
-                        </div>
-                    )}
-
-                    {/* Индикатор сохранения для текущего вопроса */}
-                    {savingStatus[currentQuestion.id!] && (
-                        <div
-                            className={`${styles.questionSavingIndicator} ${styles[savingStatus[currentQuestion.id!]]}`}
-                        >
-                            {savingStatus[currentQuestion.id!] === "saving" && "💾 Сохранение..."}
-                            {savingStatus[currentQuestion.id!] === "saved" && "✅ Сохранено"}
-                            {savingStatus[currentQuestion.id!] === "error" &&
-                                "❌ Ошибка сохранения"}
-                        </div>
-                    )}
-                </div>
-
-                <div className={styles.navigation}>
-                    <Button
-                        variant="outline"
-                        onClick={() => setCurrentQuestionIndex((prev) => prev - 1)}
-                        disabled={isFirstQuestion}
-                    >
-                        Предыдущий
-                    </Button>
-
-                    <div className={styles.questionIndicators}>
-                        {attempt.test.questions.map((_, index) => (
-                            <button
-                                key={index}
-                                className={`${styles.indicator} ${
-                                    index === currentQuestionIndex ? styles.current : ""
-                                } ${
-                                    isQuestionAnswered(attempt.test.questions[index].id!)
-                                        ? styles.answered
-                                        : ""
-                                }`}
-                                onClick={() => setCurrentQuestionIndex(index)}
-                            >
-                                {index + 1}
-                            </button>
-                        ))}
-                    </div>
-
-                    {!isLastQuestion ? (
-                        <Button
-                            variant="primary"
-                            onClick={() => setCurrentQuestionIndex((prev) => prev + 1)}
-                        >
-                            Следующий
-                        </Button>
-                    ) : (
-                        <Button
-                            variant="primary"
-                            onClick={handleCompleteTest}
-                            disabled={isCompleting}
-                        >
-                            {isCompleting ? "Завершение..." : "Завершить тест"}
-                        </Button>
-                    )}
-                </div>
+                <QuestionNavigation
+                    totalQuestions={attempt.test.questions.length}
+                    currentQuestionIndex={currentQuestionIndex}
+                    isQuestionAnswered={(index) =>
+                        isQuestionAnswered(attempt.test.questions[index].id!)
+                    }
+                    onPrevious={() => setCurrentQuestionIndex((prev) => prev - 1)}
+                    onNext={() => setCurrentQuestionIndex((prev) => prev + 1)}
+                    onQuestionSelect={setCurrentQuestionIndex}
+                    onComplete={handleCompleteTest}
+                    isCompleting={isCompleting}
+                />
             </div>
         </DashboardLayout>
     );

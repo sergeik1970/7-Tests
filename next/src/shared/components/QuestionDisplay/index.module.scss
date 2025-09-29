@@ -1,0 +1,151 @@
+.questionCard {
+    background: white;
+    border-radius: 12px;
+    padding: 2rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    margin-bottom: 2rem;
+    border: 1px solid #e5e7eb;
+    transition: box-shadow 0.2s ease;
+
+    &:hover {
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+}
+
+.questionText {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #1f2937;
+    margin-bottom: 1.5rem;
+    line-height: 1.6;
+}
+
+.options {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.choiceHint {
+    font-size: 0.875rem;
+    color: #6b7280;
+    font-style: italic;
+    margin-bottom: 0.5rem;
+    padding: 0.5rem;
+    background: #f3f4f6;
+    border-radius: 6px;
+    border-left: 3px solid #3b82f6;
+}
+
+.optionLabel {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    padding: 0.75rem;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    background: #fafafa;
+
+    &:hover {
+        background: #f0f9ff;
+        border-color: #3b82f6;
+        transform: translateY(-1px);
+        box-shadow: 0 2px 4px rgba(59, 130, 246, 0.1);
+    }
+
+    input[type="radio"],
+    input[type="checkbox"] {
+        margin: 0;
+        width: 18px;
+        height: 18px;
+        cursor: pointer;
+        accent-color: #3b82f6;
+        flex-shrink: 0;
+        margin-top: 2px;
+    }
+}
+
+.optionText {
+    flex: 1;
+    font-size: 1rem;
+    color: #374151;
+    line-height: 1.5;
+}
+
+.textInput {
+    margin-top: 1rem;
+
+    textarea {
+        width: 100%;
+        min-height: 120px;
+        padding: 1rem;
+        border: 2px solid #e5e7eb;
+        border-radius: 8px;
+        font-size: 1rem;
+        font-family: inherit;
+        resize: vertical;
+        transition: border-color 0.2s ease, box-shadow 0.2s ease;
+
+        &:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        &::placeholder {
+            color: #9ca3af;
+        }
+    }
+}
+
+.debugInfo {
+    font-size: 12px;
+    color: #666;
+    margin-bottom: 10px;
+    background: #f0f0f0;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-family: monospace;
+    line-height: 1.4;
+}
+
+.errorInfo {
+    background: #ffebee;
+    border: 1px solid #f44336;
+    padding: 10px;
+    color: #d32f2f;
+    margin-bottom: 10px;
+    border-radius: 4px;
+    font-size: 0.875rem;
+    line-height: 1.4;
+}
+
+// Адаптивность для мобильных устройств
+@media (max-width: 768px) {
+    .questionCard {
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .questionText {
+        font-size: 1.125rem;
+        margin-bottom: 1.25rem;
+    }
+
+    .optionLabel {
+        padding: 0.625rem;
+        gap: 0.625rem;
+    }
+
+    .optionText {
+        font-size: 0.9rem;
+    }
+
+    .textInput textarea {
+        padding: 0.75rem;
+        min-height: 100px;
+    }
+}

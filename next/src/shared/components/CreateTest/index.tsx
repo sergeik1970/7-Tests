@@ -129,20 +129,25 @@ const CreateTest: React.FC<CreateTestProps> = ({ onSuccess, onError }) => {
                     ...question,
                     type: question.type === "text" ? "text_input" : question.type, // Преобразуем тип для API
                     order: index,
-                    options: question.options?.filter((opt) => opt.text.trim() !== "").map((opt, optIndex) => ({
-                        ...opt,
-                        order: optIndex
-                    })) || [],
+                    options:
+                        question.options
+                            ?.filter((opt) => opt.text.trim() !== "")
+                            .map((opt, optIndex) => ({
+                                ...opt,
+                                order: optIndex,
+                            })) || [],
                 })),
             };
 
             const response = await createTest(testData);
 
-            if (onSuccess) {
-                onSuccess(response.id);
+            if (onSuccess && response.id) {
+                onSuccess(response.id.toString());
             }
 
-            router.push(`/dashboard/tests/${response.id}`);
+            if (response.id) {
+                router.push(`/dashboard/tests/${response.id}`);
+            }
         } catch (err: any) {
             const errorMessage =
                 err.response?.data?.message || "Произошла ошибка при создании теста";
@@ -157,6 +162,7 @@ const CreateTest: React.FC<CreateTestProps> = ({ onSuccess, onError }) => {
     };
 
     const validationErrors = getValidationErrors();
+    const isFormValid = validationErrors.length === 0 && testInfo.title.trim().length > 0 && questions.length > 0;
 
     return (
         <div className={styles.createTest}>
@@ -185,7 +191,7 @@ const CreateTest: React.FC<CreateTestProps> = ({ onSuccess, onError }) => {
                 </div>
             </form>
 
-            <FloatingValidation errors={validationErrors} />
+            <FloatingValidation errors={validationErrors} isFormValid={isFormValid} />
         </div>
     );
 };

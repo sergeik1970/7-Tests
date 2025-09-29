@@ -1,0 +1,172 @@
+.overviewSection {
+    margin-bottom: 32px;
+}
+
+.sectionTitle {
+    font-size: 24px;
+    font-weight: 600;
+    color: #1f2937;
+    margin: 0 0 24px 0;
+}
+
+.statsGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 24px;
+}
+
+.statCard {
+    background: white;
+    border-radius: 12px;
+    padding: 24px;
+    border: 1px solid #e5e7eb;
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    transition: all 0.2s ease;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+
+    &:hover {
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        transform: translateY(-2px);
+    }
+}
+
+.statIcon {
+    font-size: 32px;
+    width: 48px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #f3f4f6;
+    border-radius: 12px;
+    flex-shrink: 0;
+}
+
+.statContent {
+    flex: 1;
+    min-width: 0;
+}
+
+.statNumber {
+    font-size: 32px;
+    font-weight: 700;
+    color: #10b981;
+    line-height: 1;
+    margin-bottom: 4px;
+}
+
+.statLabel {
+    font-size: 16px;
+    font-weight: 600;
+    color: #1f2937;
+    margin-bottom: 4px;
+}
+
+.statDetails {
+    font-size: 14px;
+    color: #6b7280;
+    line-height: 1.4;
+}
+
+// Адаптивность
+@media (max-width: 768px) {
+    .statsGrid {
+        grid-template-columns: 1fr;
+        gap: 16px;
+    }
+
+    .statCard {
+        padding: 20px;
+        gap: 12px;
+    }
+
+    .statIcon {
+        font-size: 28px;
+        width: 40px;
+        height: 40px;
+    }
+
+    .statNumber {
+        font-size: 28px;
+    }
+
+    .statLabel {
+        font-size: 15px;
+    }
+
+    .statDetails {
+        font-size: 13px;
+    }
+}
+
+@media (max-width: 480px) {
+    .sectionTitle {
+        font-size: 20px;
+        margin-bottom: 20px;
+    }
+
+    .statCard {
+        padding: 16px;
+        gap: 10px;
+    }
+
+    .statIcon {
+        font-size: 24px;
+        width: 36px;
+        height: 36px;
+    }
+
+    .statNumber {
+        font-size: 24px;
+    }
+}
+
+// Состояние загрузки
+.statCard.loading {
+    opacity: 0.6;
+    pointer-events: none;
+    
+    .statNumber,
+    .statLabel,
+    .statDetails {
+        background: #f3f4f6;
+        color: transparent;
+        border-radius: 4px;
+        animation: pulse 1.5s ease-in-out infinite;
+    }
+}
+
+@keyframes pulse {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.5;
+    }
+}
+
+// Темная тема отключена
+// @media (prefers-color-scheme: dark) {
+//     .sectionTitle {
+//         color: #f9fafb;
+//     }
+
+//     .statCard {
+//         background: #1f2937;
+//         border-color: #374151;
+//     }
+
+//     .statIcon {
+//         background: #374151;
+//     }
+
+//     .statLabel {
+//         color: #f9fafb;
+//     }
+
+//     .statDetails {
+//         color: #9ca3af;
+//     }
+// }

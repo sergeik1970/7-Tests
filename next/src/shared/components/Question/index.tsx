@@ -116,7 +116,7 @@ const Question: React.FC<QuestionProps> = ({
                                 option={option}
                                 optionIndex={optionIndex}
                                 questionIndex={questionIndex}
-                                questionType={question.type}
+                                questionType={question.type as "single_choice" | "multiple_choice"}
                                 onTextChange={(text) => onOptionTextChange(optionIndex, text)}
                                 onToggleCorrect={() => onToggleCorrectOption(optionIndex)}
                                 onKeyDown={(e) => onOptionKeyDown(optionIndex, e)}

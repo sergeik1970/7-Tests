@@ -2,6 +2,10 @@ import React, { useState, useEffect } from "react";
 import { useRouter } from "next/router";
 import DashboardLayout from "@/shared/components/DashboardLayout";
 import Button from "@/shared/components/Button";
+import TestPreview from "@/shared/components/TestPreview";
+import StatusBadge from "@/shared/components/StatusBadge";
+import LoadingState from "@/shared/components/LoadingState";
+import ErrorState from "@/shared/components/ErrorState";
 import { useAuth } from "@/contexts/AuthContext";
 import { getTest, publishTest, deactivateTest, deleteTest, startTest } from "@/services/api";
 import type { Test } from "@/services/api";
@@ -21,7 +25,7 @@ const TestDetailPage = () => {
     const [error, setError] = useState("");
 
     useEffect(() => {
-        if (id && typeof id === 'string') {
+        if (id && typeof id === "string") {
             loadTest(parseInt(id));
         }
     }, [id]);
@@ -40,7 +44,7 @@ const TestDetailPage = () => {
 
     const handlePublish = async () => {
         if (!test) return;
-        
+
         try {
             setIsPublishing(true);
             const updatedTest = await publishTest(test.id!);
@@ -55,7 +59,11 @@ const TestDetailPage = () => {
     const handleDeactivate = async () => {
         if (!test) return;
 
-        if (!confirm("Вы уверены, что хотите деактивировать тест? Ученики больше не смогут его проходить.")) {
+        if (
+            !confirm(
+                "Вы уверены, что хотите деактивировать тест? Ученики больше не смогут его проходить.",
+            )
+        ) {
             return;
         }
 
@@ -72,11 +80,11 @@ const TestDetailPage = () => {
 
     const handleDelete = async () => {
         if (!test || !confirm("Вы уверены, что хотите удалить этот тест?")) return;
-        
+
         try {
             setIsDeleting(true);
             await deleteTest(test.id!);
-            router.push('/dashboard');
+            router.push("/dashboard");
         } catch (err) {
             setError(err instanceof Error ? err.message : "Ошибка удаления теста");
             setIsDeleting(false);
@@ -85,7 +93,7 @@ const TestDetailPage = () => {
 
     const handleStartTest = async () => {
         if (!test) return;
-        
+
         try {
             setIsStarting(true);
             const attempt = await startTest(test.id!);
@@ -96,30 +104,12 @@ const TestDetailPage = () => {
         }
     };
 
-    const getStatusText = (status: string) => {
-        switch (status) {
-            case 'draft': return 'Черновик';
-            case 'active': return 'Активный';
-            case 'completed': return 'Завершен';
-            default: return status;
-        }
-    };
 
-    const getStatusClass = (status: string) => {
-        switch (status) {
-            case 'draft': return styles.statusDraft;
-            case 'active': return styles.statusActive;
-            case 'completed': return styles.statusCompleted;
-            default: return '';
-        }
-    };
 
     if (isLoading) {
         return (
             <DashboardLayout>
-                <div className={styles.loading}>
-                    <p>Загрузка теста...</p>
-                </div>
+                <LoadingState message="Загрузка теста..." />
             </DashboardLayout>
         );
     }
@@ -127,13 +117,10 @@ const TestDetailPage = () => {
     if (error || !test) {
         return (
             <DashboardLayout>
-                <div className={styles.error}>
-                    <h2>Ошибка</h2>
-                    <p>{error || "Тест не найден"}</p>
-                    <Button onClick={() => router.push('/dashboard')}>
-                        Вернуться к панели
-                    </Button>
-                </div>
+                <ErrorState
+                    message={error || "Тест не найден"}
+                    onAction={() => router.push("/dashboard")}
+                />
             </DashboardLayout>
         );
     }
@@ -146,16 +133,14 @@ const TestDetailPage = () => {
                 <div className={styles.header}>
                     <div className={styles.titleSection}>
                         <h1 className={styles.title}>{test.title}</h1>
-                        <span className={`${styles.status} ${getStatusClass(test.status)}`}>
-                            {getStatusText(test.status)}
-                        </span>
+                        <StatusBadge status={test.status as any} />
                     </div>
-                    
+
                     <div className={styles.actions}>
                         {isOwner && (
                             <>
-                                {test.status === 'draft' && (
-                                    <Button 
+                                {test.status === "draft" && (
+                                    <Button
                                         variant="primary"
                                         onClick={handlePublish}
                                         disabled={isPublishing}
@@ -163,9 +148,9 @@ const TestDetailPage = () => {
                                         {isPublishing ? "Публикация..." : "Опубликовать"}
                                     </Button>
                                 )}
-                                
-                                {test.status === 'active' && (
-                                    <Button 
+
+                                {test.status === "active" && (
+                                    <Button
                                         variant="outline"
                                         onClick={handleDeactivate}
                                         disabled={isDeactivating}
@@ -174,16 +159,16 @@ const TestDetailPage = () => {
                                         {isDeactivating ? "Деактивация..." : "Деактивировать"}
                                     </Button>
                                 )}
-                                
-                                <Button 
+
+                                <Button
                                     variant="outline"
                                     onClick={() => router.push(`/dashboard/tests/${test.id}/edit`)}
                                     disabled={isPublishing || isDeleting}
                                 >
                                     Редактировать
                                 </Button>
-                                
-                                <Button 
+
+                                <Button
                                     variant="outline"
                                     onClick={handleDelete}
                                     disabled={isPublishing || isDeleting}
@@ -193,123 +178,21 @@ const TestDetailPage = () => {
                                 </Button>
                             </>
                         )}
-                        
 
-                        
-                        <Button 
-                            variant="outline"
-                            onClick={() => router.back()}
-                        >
+                        <Button variant="outline" onClick={() => router.back()}>
                             Назад
                         </Button>
                     </div>
                 </div>
 
-                {error && (
-                    <div className={styles.errorMessage}>
-                        {error}
-                    </div>
-                )}
+                {error && <div className={styles.errorMessage}>{error}</div>}
 
-                <div className={styles.content}>
-                    <div className={styles.info}>
-                        <div className={styles.infoItem}>
-                            <strong>Описание:</strong>
-                            <p>{test.description || "Описание не указано"}</p>
-                        </div>
-                        
-                        <div className={styles.infoItem}>
-                            <strong>Время на прохождение:</strong>
-                            <p>{test.timeLimit ? `${test.timeLimit} минут` : "Не ограничено"}</p>
-                        </div>
-                        
-                        <div className={styles.infoItem}>
-                            <strong>Количество вопросов:</strong>
-                            <p>{test.questions.length}</p>
-                        </div>
-                        
-                        {test.creator && (
-                            <div className={styles.infoItem}>
-                                <strong>Автор:</strong>
-                                <p>{test.creator.name}</p>
-                            </div>
-                        )}
-                    </div>
-
-                    {isOwner && (
-                        <div className={styles.questions}>
-                            <h2 className={styles.sectionTitle}>Вопросы</h2>
-                            
-                            {test.questions.length === 0 ? (
-                                <div className={styles.emptyState}>
-                                    <p>В тесте пока нет вопросов</p>
-                                </div>
-                            ) : (
-                                <div className={styles.questionsList}>
-                                    {test.questions.map((question, index) => (
-                                        <div key={question.id || index} className={styles.questionCard}>
-                                            <div className={styles.questionHeader}>
-                                                <h3 className={styles.questionTitle}>
-                                                    Вопрос {index + 1}
-                                                </h3>
-                                                <span className={styles.questionType}>
-                                                    {question.type === 'multiple_choice' ? 'Выбор из вариантов' : 'Текстовый ответ'}
-                                                </span>
-                                            </div>
-                                            
-                                            <p className={styles.questionText}>{question.text}</p>
-                                            
-                                            {question.type === 'multiple_choice' && question.options && (
-                                                <div className={styles.options}>
-                                                    {question.options.map((option, optionIndex) => (
-                                                        <div 
-                                                            key={optionIndex} 
-                                                            className={`${styles.option} ${option.isCorrect ? styles.correctOption : ''}`}
-                                                        >
-                                                            <span className={styles.optionMarker}>
-                                                                {option.isCorrect ? '✓' : '○'}
-                                                            </span>
-                                                            <span className={styles.optionText}>
-                                                                {option.text}
-                                                            </span>
-                                                        </div>
-                                                    ))}
-                                                </div>
-                                            )}
-                                            
-                                            {question.type === 'text_input' && question.correctTextAnswer && (
-                                                <div className={styles.textAnswer}>
-                                                    <strong>Правильный ответ:</strong> {question.correctTextAnswer}
-                                                </div>
-                                            )}
-                                        </div>
-                                    ))}
-                                </div>
-                            )}
-                        </div>
-                    )}
-                    
-                    {!isOwner && test.status === 'active' && (
-                        <div className={styles.studentInfo}>
-                            <div className={styles.infoCard}>
-                                <h3>Готовы начать тест?</h3>
-                                <p>После начала теста у вас будет {test.timeLimit ? `${test.timeLimit} минут` : 'неограниченное время'} на прохождение.</p>
-                                <p>Тест содержит {test.questions.length} {test.questions.length === 1 ? 'вопрос' : test.questions.length < 5 ? 'вопроса' : 'вопросов'}.</p>
-                                
-                                <div className={styles.startTestSection}>
-                                    <Button
-                                        variant="primary"
-                                        onClick={handleStartTest}
-                                        disabled={isStarting || test.questions.length === 0}
-                                        className={styles.startButton}
-                                    >
-                                        {isStarting ? "Начинаем..." : "Начать тест"}
-                                    </Button>
-                                </div>
-                            </div>
-                        </div>
-                    )}
-                </div>
+                <TestPreview
+                    test={test}
+                    isOwner={!!isOwner}
+                    isStarting={isStarting}
+                    onStartTest={handleStartTest}
+                />
             </div>
         </DashboardLayout>
     );

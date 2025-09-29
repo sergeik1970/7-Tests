@@ -2,6 +2,10 @@ import React, { useState, useEffect } from "react";
 import { useRouter } from "next/router";
 import DashboardLayout from "@/shared/components/DashboardLayout";
 import Button from "@/shared/components/Button";
+import LoadingState from "@/shared/components/LoadingState";
+import StatusBadge from "@/shared/components/StatusBadge";
+import EmptyState from "@/shared/components/EmptyState";
+import TestCard from "@/shared/components/TestCard";
 import { useAuth } from "@/contexts/AuthContext";
 import { getTests } from "@/services/api";
 import type { Test } from "@/services/api";
@@ -105,68 +109,32 @@ const DashboardPage = () => {
                     {error && <div className={styles.error}>{error}</div>}
 
                     {isLoading ? (
-                        <div className={styles.loading}>
-                            <p>Загрузка тестов...</p>
-                        </div>
+                        <LoadingState message="Загрузка тестов..." size="small" />
                     ) : tests.length === 0 ? (
-                        <div className={styles.emptyState}>
-                            <p>
-                                {user?.role && isTeacher(user.role)
-                                    ? "У вас пока нет тестов"
-                                    : "Нет доступных тестов"}
-                            </p>
-                            {user?.role && isTeacher(user.role) && (
-                                <Button
-                                    variant="primary"
-                                    size="small"
-                                    onClick={() => router.push("/dashboard/tests/create")}
-                                >
-                                    Создать первый тест
-                                </Button>
-                            )}
-                        </div>
+                        <EmptyState
+                            title={user?.role && isTeacher(user.role) 
+                                ? "У вас пока нет тестов" 
+                                : "Нет доступных тестов"
+                            }
+                            message={user?.role && isTeacher(user.role)
+                                ? "Создайте свой первый тест, чтобы начать работу"
+                                : "Пока нет активных тестов для прохождения"
+                            }
+                            actionText={user?.role && isTeacher(user.role) ? "Создать первый тест" : undefined}
+                            onAction={user?.role && isTeacher(user.role) 
+                                ? () => router.push("/dashboard/tests/create")
+                                : undefined
+                            }
+                            icon="📝"
+                        />
                     ) : (
                         <div className={styles.testsList}>
                             {tests.slice(0, 3).map((test) => (
-                                <div key={test.id} className={styles.testCard}>
-                                    <div className={styles.testInfo}>
-                                        <h3 className={styles.testName}>{test.title}</h3>
-                                        {test.description && (
-                                            <p className={styles.testDescription}>
-                                                {test.description}
-                                            </p>
-                                        )}
-                                        <div className={styles.testMeta}>
-                                            <span>📝 {test.questions.length} вопросов</span>
-                                            {test.timeLimit && <span>⏱️ {test.timeLimit} мин</span>}
-                                            {test.creator &&
-                                                user?.role &&
-                                                !isTeacher(user.role) && (
-                                                    <span>👨‍🏫 {test.creator.name}</span>
-                                                )}
-                                        </div>
-                                    </div>
-                                    <div className={styles.testActions}>
-                                        <span className={`${styles.status} ${styles[test.status]}`}>
-                                            {test.status === "active" && "Активный"}
-                                            {test.status === "completed" && "Завершен"}
-                                            {test.status === "draft" && "Черновик"}
-                                        </span>
-                                        <Button
-                                            variant="outline"
-                                            size="small"
-                                            onClick={() =>
-                                                router.push(`/dashboard/tests/${test.id}`)
-                                            }
-                                        >
-                                            {user?.role && isTeacher(user.role)
-                                                ? "Управлять"
-                                                : test.status === "active"
-                                                  ? "Пройти"
-                                                  : "Просмотр"}
-                                        </Button>
-                                    </div>
-                                </div>
+                                <TestCard
+                                    key={test.id}
+                                    test={test}
+                                    showCreator={true}
+                                />
                             ))}
                         </div>
                     )}

@@ -4,7 +4,7 @@ import Question, { QuestionData } from "@/shared/components/Question";
 import { QuestionOptionData } from "@/shared/components/QuestionOption";
 import styles from "./index.module.scss";
 
-export { QuestionData };
+export type { QuestionData };
 
 interface QuestionsProps {
     questions: QuestionData[];
@@ -12,11 +12,7 @@ interface QuestionsProps {
     disabled?: boolean;
 }
 
-const Questions: React.FC<QuestionsProps> = ({
-    questions,
-    onChange,
-    disabled = false,
-}) => {
+const Questions: React.FC<QuestionsProps> = ({ questions, onChange, disabled = false }) => {
     // Добавление нового вопроса
     const handleAddQuestion = () => {
         const newQuestion: QuestionData = {
@@ -24,8 +20,8 @@ const Questions: React.FC<QuestionsProps> = ({
             type: "single_choice",
             order: questions.length,
             options: [
-                { text: "", isCorrect: false },
-                { text: "", isCorrect: false },
+                { text: "", isCorrect: false, order: 0 },
+                { text: "", isCorrect: false, order: 1 },
             ],
         };
         onChange([...questions, newQuestion]);
@@ -59,8 +55,8 @@ const Questions: React.FC<QuestionsProps> = ({
                 updatedQuestions[questionIndex].correctTextAnswer = undefined;
                 if (!updatedQuestions[questionIndex].options) {
                     updatedQuestions[questionIndex].options = [
-                        { text: "", isCorrect: false },
-                        { text: "", isCorrect: false },
+                        { text: "", isCorrect: false, order: 0 },
+                        { text: "", isCorrect: false, order: 1 },
                     ];
                 }
             }
@@ -85,7 +81,7 @@ const Questions: React.FC<QuestionsProps> = ({
     const handleToggleCorrectOption = (questionIndex: number, optionIndex: number) => {
         const updatedQuestions = [...questions];
         const question = updatedQuestions[questionIndex];
-        
+
         if (question.options) {
             // Для одиночного выбора сначала сбрасываем все остальные
             if (question.type === "single_choice") {
@@ -104,18 +100,19 @@ const Questions: React.FC<QuestionsProps> = ({
     const handleOptionKeyDown = (
         questionIndex: number,
         optionIndex: number,
-        e: React.KeyboardEvent<HTMLInputElement>
+        e: React.KeyboardEvent<HTMLInputElement>,
     ) => {
         if (e.key === "Enter") {
             e.preventDefault();
             const question = questions[questionIndex];
-            
+
             if (question.options && optionIndex === question.options.length - 1) {
                 // Добавляем новую опцию
                 const updatedQuestions = [...questions];
                 updatedQuestions[questionIndex].options!.push({
                     text: "",
                     isCorrect: false,
+                    order: question.options?.length || 0,
                 });
                 onChange(updatedQuestions);
 
@@ -145,7 +142,12 @@ const Questions: React.FC<QuestionsProps> = ({
         <div className={styles.section}>
             <div className={styles.sectionHeader}>
                 <h2 className={styles.sectionTitle}>Вопросы</h2>
-                <Button type="button" variant="outline" onClick={handleAddQuestion} disabled={disabled}>
+                <Button
+                    type="button"
+                    variant="outline"
+                    onClick={handleAddQuestion}
+                    disabled={disabled}
+                >
                     Добавить вопрос
                 </Button>
             </div>

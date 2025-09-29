@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/router";
 import DashboardLayout from "@/shared/components/DashboardLayout";
+import StatisticsOverview from "@/shared/components/StatisticsOverview";
+import TestStatisticsTable from "@/shared/components/TestStatisticsTable";
 import { useAuth } from "@/contexts/AuthContext";
 import { getTeacherStatistics } from "@/services/api";
 import type { TeacherStatistics } from "@/services/api";
@@ -17,7 +19,7 @@ const StatisticsPage = () => {
     useEffect(() => {
         // Проверяем, что пользователь - учитель или преподаватель
         if (user && !isTeacher(user.role)) {
-            router.push('/dashboard');
+            router.push("/dashboard");
             return;
         }
 
@@ -39,20 +41,8 @@ const StatisticsPage = () => {
         }
     };
 
-    const getStatusText = (status: string) => {
-        switch (status) {
-            case 'active': return 'Активный';
-            case 'draft': return 'Черновик';
-            default: return status;
-        }
-    };
-
-    const getStatusClass = (status: string) => {
-        switch (status) {
-            case 'active': return styles.statusActive;
-            case 'draft': return styles.statusDraft;
-            default: return '';
-        }
+    const handleTestClick = (testId: number) => {
+        router.push(`/dashboard/tests/${testId}`);
     };
 
     if (isLoading) {
@@ -87,96 +77,12 @@ const StatisticsPage = () => {
                     <p>Общая информация о ваших тестах и учениках</p>
                 </div>
 
-                {/* Общая статистика */}
-                <div className={styles.overviewSection}>
-                    <h2>Общая статистика</h2>
-                    <div className={styles.statsGrid}>
-                        <div className={styles.statCard}>
-                            <div className={styles.statIcon}>📝</div>
-                            <div className={styles.statContent}>
-                                <div className={styles.statNumber}>{statistics.overview.totalTests}</div>
-                                <div className={styles.statLabel}>Всего тестов</div>
-                                <div className={styles.statDetails}>
-                                    {statistics.overview.activeTests} активных, {statistics.overview.draftTests} черновиков
-                                </div>
-                            </div>
-                        </div>
+                <StatisticsOverview data={statistics.overview} />
 
-                        <div className={styles.statCard}>
-                            <div className={styles.statIcon}>👥</div>
-                            <div className={styles.statContent}>
-                                <div className={styles.statNumber}>{statistics.overview.totalStudents}</div>
-                                <div className={styles.statLabel}>Учеников</div>
-                                <div className={styles.statDetails}>
-                                    Прошли ваши тесты
-                                </div>
-                            </div>
-                        </div>
-
-                        <div className={styles.statCard}>
-                            <div className={styles.statIcon}>🎯</div>
-                            <div className={styles.statContent}>
-                                <div className={styles.statNumber}>{statistics.overview.totalAttempts}</div>
-                                <div className={styles.statLabel}>Попыток</div>
-                                <div className={styles.statDetails}>
-                                    {statistics.overview.completedAttempts} завершено
-                                </div>
-                            </div>
-                        </div>
-
-                        <div className={styles.statCard}>
-                            <div className={styles.statIcon}>⭐</div>
-                            <div className={styles.statContent}>
-                                <div className={styles.statNumber}>{statistics.overview.averageScore}%</div>
-                                <div className={styles.statLabel}>Средний балл</div>
-                                <div className={styles.statDetails}>
-                                    По всем тестам
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                {/* Статистика по тестам */}
-                <div className={styles.testsSection}>
-                    <h2>Статистика по тестам</h2>
-                    {statistics.testStatistics.length === 0 ? (
-                        <div className={styles.emptyState}>
-                            <p>У вас пока нет тестов</p>
-                        </div>
-                    ) : (
-                        <div className={styles.testsTable}>
-                            <div className={styles.tableHeader}>
-                                <div className={styles.tableCell}>Название теста</div>
-                                <div className={styles.tableCell}>Статус</div>
-                                <div className={styles.tableCell}>Попыток</div>
-                                <div className={styles.tableCell}>Завершено</div>
-                                <div className={styles.tableCell}>Средний балл</div>
-                                <div className={styles.tableCell}>Создан</div>
-                            </div>
-                            {statistics.testStatistics.map((test) => (
-                                <div key={test.id} className={styles.tableRow}>
-                                    <div className={styles.tableCell}>
-                                        <div className={styles.testTitle}>{test.title}</div>
-                                    </div>
-                                    <div className={styles.tableCell}>
-                                        <span className={`${styles.status} ${getStatusClass(test.status)}`}>
-                                            {getStatusText(test.status)}
-                                        </span>
-                                    </div>
-                                    <div className={styles.tableCell}>{test.totalAttempts}</div>
-                                    <div className={styles.tableCell}>{test.completedAttempts}</div>
-                                    <div className={styles.tableCell}>
-                                        {test.averageScore > 0 ? `${test.averageScore}%` : '—'}
-                                    </div>
-                                    <div className={styles.tableCell}>
-                                        {new Date(test.createdAt).toLocaleDateString('ru-RU')}
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-                    )}
-                </div>
+                <TestStatisticsTable
+                    data={statistics.testStatistics}
+                    onTestClick={handleTestClick}
+                />
             </div>
         </DashboardLayout>
     );

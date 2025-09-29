@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useRouter } from "next/router";
 import Button from "@/shared/components/Button";
 import InputText from "@/shared/components/InputText";
+import FormField from "@/shared/components/FormField";
 import AuthNavigation from "@/shared/components/AuthNavigation";
 import { useAuth } from "@/contexts/AuthContext";
 import styles from "./auth.module.scss";
@@ -57,67 +58,54 @@ const RegisterPage = () => {
                         </div>
                     )}
 
-                    <div className={styles.field}>
-                        <label className={styles.label}>Имя</label>
-                        <InputText
-                            value={formData.name}
-                            onChange={(e) => handleChange("name", e.target.value)}
-                            placeholder="Введите ваше имя"
-                            required
-                            disabled={isLoading}
-                        />
-                    </div>
+                    <FormField
+                        label="Имя"
+                        value={formData.name}
+                        onChange={(value) => handleChange("name", value)}
+                        placeholder="Введите ваше имя"
+                        required
+                    />
 
-                    <div className={styles.field}>
-                        <label className={styles.label}>Email</label>
-                        <InputText
-                            type="email"
-                            value={formData.email}
-                            onChange={(e) => handleChange("email", e.target.value)}
-                            placeholder="Введите ваш email"
-                            required
-                            disabled={isLoading}
-                        />
-                    </div>
+                    <FormField
+                        label="Email"
+                        type="email"
+                        value={formData.email}
+                        onChange={(value) => handleChange("email", value)}
+                        placeholder="Введите ваш email"
+                        required
+                    />
 
-                    <div className={styles.field}>
-                        <label className={styles.label}>Роль</label>
-                        <select 
-                            className={styles.select}
-                            value={formData.role}
-                            onChange={(e) => handleChange("role", e.target.value)}
-                            disabled={isLoading}
-                        >
-                            <option value="pupil">Ученик</option>
-                            <option value="teacher">Учитель</option>
-                            <option value="student">Студент</option>
-                            <option value="professor">Преподаватель</option>
-                        </select>
-                    </div>
+                    <FormField
+                        label="Роль"
+                        type="select"
+                        value={formData.role}
+                        onChange={(value) => handleChange("role", value)}
+                        options={[
+                            { value: "pupil", label: "Ученик" },
+                            { value: "teacher", label: "Учитель" },
+                            { value: "student", label: "Студент" },
+                            { value: "professor", label: "Преподаватель" }
+                        ]}
+                        required
+                    />
 
-                    <div className={styles.field}>
-                        <label className={styles.label}>Пароль</label>
-                        <InputText
-                            type="password"
-                            value={formData.password}
-                            onChange={(e) => handleChange("password", e.target.value)}
-                            placeholder="Введите пароль"
-                            required
-                            disabled={isLoading}
-                        />
-                    </div>
+                    <FormField
+                        label="Пароль"
+                        type="password"
+                        value={formData.password}
+                        onChange={(value) => handleChange("password", value)}
+                        placeholder="Введите пароль"
+                        required
+                    />
 
-                    <div className={styles.field}>
-                        <label className={styles.label}>Подтвердите пароль</label>
-                        <InputText
-                            type="password"
-                            value={formData.confirmPassword}
-                            onChange={(e) => handleChange("confirmPassword", e.target.value)}
-                            placeholder="Повторите пароль"
-                            required
-                            disabled={isLoading}
-                        />
-                    </div>
+                    <FormField
+                        label="Подтвердите пароль"
+                        type="password"
+                        value={formData.confirmPassword}
+                        onChange={(value) => handleChange("confirmPassword", value)}
+                        placeholder="Повторите пароль"
+                        required
+                    />
 
                     <Button 
                         variant="primary" 

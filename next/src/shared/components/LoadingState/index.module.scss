@@ -1,0 +1,123 @@
+.loadingState {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+    text-align: center;
+    
+    &.small {
+        padding: 1rem;
+        
+        .spinner {
+            width: 24px;
+            height: 24px;
+        }
+        
+        .message {
+            font-size: 14px;
+            margin-top: 0.5rem;
+        }
+    }
+    
+    &.medium {
+        padding: 2rem;
+        
+        .spinner {
+            width: 32px;
+            height: 32px;
+        }
+        
+        .message {
+            font-size: 16px;
+            margin-top: 1rem;
+        }
+    }
+    
+    &.large {
+        padding: 3rem;
+        
+        .spinner {
+            width: 48px;
+            height: 48px;
+        }
+        
+        .message {
+            font-size: 18px;
+            margin-top: 1.5rem;
+        }
+    }
+}
+
+.spinner {
+    border-radius: 50%;
+    position: relative;
+    animation: spin 1s linear infinite;
+    
+    &::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        border-radius: 50%;
+        border: 3px solid #e5e7eb;
+        border-top-color: #3b82f6;
+    }
+}
+
+.spinnerInner {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    border: 3px solid transparent;
+    border-top-color: #3b82f6;
+    animation: spin 1s linear infinite;
+}
+
+.message {
+    color: #6b7280;
+    font-weight: 500;
+    margin: 0;
+}
+
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+// Адаптивность
+@media (max-width: 768px) {
+    .loadingState {
+        &.medium {
+            padding: 1.5rem;
+            
+            .spinner {
+                width: 28px;
+                height: 28px;
+            }
+            
+            .message {
+                font-size: 15px;
+            }
+        }
+        
+        &.large {
+            padding: 2rem;
+            
+            .spinner {
+                width: 40px;
+                height: 40px;
+            }
+            
+            .message {
+                font-size: 16px;
+            }
+        }
+    }
+}
