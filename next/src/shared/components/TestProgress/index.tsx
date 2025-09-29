@@ -12,18 +12,10 @@ const TestProgress: React.FC<TestProgressProps> = ({
     totalQuestions,
     className = "",
 }) => {
-    const progressPercentage = (currentQuestion / totalQuestions) * 100;
-
     return (
         <div className={`${styles.progress} ${className}`}>
             <div className={styles.progressText}>
                 Вопрос {currentQuestion} из {totalQuestions}
-            </div>
-            <div className={styles.progressBar}>
-                <div 
-                    className={styles.progressFill}
-                    style={{ width: `${progressPercentage}%` }}
-                />
             </div>
         </div>
     );

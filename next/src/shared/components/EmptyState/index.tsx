@@ -25,12 +25,7 @@ const EmptyState: React.FC<EmptyStateProps> = ({
             <h2 className={styles.title}>{title}</h2>
             <p className={styles.message}>{message}</p>
             {actionText && onAction && (
-                <Button
-                    variant="primary"
-                    size="small"
-                    onClick={onAction}
-                    className={styles.action}
-                >
+                <Button variant="primary" size="small" onClick={onAction} className={styles.action}>
                     {actionText}
                 </Button>
             )}

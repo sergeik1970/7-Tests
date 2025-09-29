@@ -9,26 +9,26 @@ interface IButton extends React.ButtonHTMLAttributes<HTMLButtonElement> {
 }
 
 const Button = (props: IButton): ReactElement => {
-    const { 
-        children, 
-        variant = "primary", 
+    const {
+        children,
+        variant = "primary",
         size = "medium",
-        types = "primary", 
+        types = "primary",
         onClick = () => null,
         className,
-        ...rest 
+        ...rest
     } = props;
-    
+
     // Используем types для обратной совместимости, если variant не указан
     const buttonVariant = variant || types;
-    
+
     return (
         <button
             className={clsx(
-                styles["button"], 
+                styles["button"],
                 styles[`button-${buttonVariant}`],
                 styles[`button-${size}`],
-                className
+                className,
             )}
             type="button"
             onClick={onClick}

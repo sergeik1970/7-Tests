@@ -17,7 +17,7 @@ const ErrorState: React.FC<ErrorStateProps> = ({
     actionLabel = "Вернуться к панели",
     onAction,
     className,
-    showIcon = true
+    showIcon = true,
 }) => {
     return (
         <div className={`${styles.errorState} ${className || ""}`}>
@@ -36,10 +36,10 @@ const ErrorState: React.FC<ErrorStateProps> = ({
                     </svg>
                 </div>
             )}
-            
+
             <h2 className={styles.title}>{title}</h2>
             <p className={styles.message}>{message}</p>
-            
+
             {onAction && (
                 <Button onClick={onAction} variant="primary" className={styles.action}>
                     {actionLabel}

@@ -32,19 +32,19 @@ const TestTimer: React.FC<TestTimerProps> = ({
         const timer = setInterval(() => {
             setTimeLeft((prevTime) => {
                 const newTime = prevTime - 1;
-                
+
                 // Отладочная информация
                 console.log("Timer tick:", {
                     prevTime,
                     newTime,
-                    willCallOnTimeUp: newTime <= 0
+                    willCallOnTimeUp: newTime <= 0,
                 });
 
                 if (newTime <= 0) {
                     onTimeUp();
                     return 0;
                 }
-                
+
                 return newTime;
             });
         }, 1000);

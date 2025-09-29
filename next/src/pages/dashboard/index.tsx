@@ -112,29 +112,32 @@ const DashboardPage = () => {
                         <LoadingState message="Загрузка тестов..." size="small" />
                     ) : tests.length === 0 ? (
                         <EmptyState
-                            title={user?.role && isTeacher(user.role) 
-                                ? "У вас пока нет тестов" 
-                                : "Нет доступных тестов"
+                            title={
+                                user?.role && isTeacher(user.role)
+                                    ? "У вас пока нет тестов"
+                                    : "Нет доступных тестов"
                             }
-                            message={user?.role && isTeacher(user.role)
-                                ? "Создайте свой первый тест, чтобы начать работу"
-                                : "Пока нет активных тестов для прохождения"
+                            message={
+                                user?.role && isTeacher(user.role)
+                                    ? "Создайте свой первый тест, чтобы начать работу"
+                                    : "Пока нет активных тестов для прохождения"
                             }
-                            actionText={user?.role && isTeacher(user.role) ? "Создать первый тест" : undefined}
-                            onAction={user?.role && isTeacher(user.role) 
-                                ? () => router.push("/dashboard/tests/create")
-                                : undefined
+                            actionText={
+                                user?.role && isTeacher(user.role)
+                                    ? "Создать первый тест"
+                                    : undefined
+                            }
+                            onAction={
+                                user?.role && isTeacher(user.role)
+                                    ? () => router.push("/dashboard/tests/create")
+                                    : undefined
                             }
                             icon="📝"
                         />
                     ) : (
                         <div className={styles.testsList}>
                             {tests.slice(0, 3).map((test) => (
-                                <TestCard
-                                    key={test.id}
-                                    test={test}
-                                    showCreator={true}
-                                />
+                                <TestCard key={test.id} test={test} showCreator={true} />
                             ))}
                         </div>
                     )}

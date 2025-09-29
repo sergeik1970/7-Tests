@@ -146,7 +146,7 @@ const CreateTest: React.FC<CreateTestProps> = ({ onSuccess, onError }) => {
             }
 
             if (response.id) {
-                router.push(`/dashboard/tests/${response.id}`);
+                router.push(`/dashboard/tests/detail?id=${response.id}`);
             }
         } catch (err: any) {
             const errorMessage =
@@ -162,7 +162,8 @@ const CreateTest: React.FC<CreateTestProps> = ({ onSuccess, onError }) => {
     };
 
     const validationErrors = getValidationErrors();
-    const isFormValid = validationErrors.length === 0 && testInfo.title.trim().length > 0 && questions.length > 0;
+    const isFormValid =
+        validationErrors.length === 0 && testInfo.title.trim().length > 0 && questions.length > 0;
 
     return (
         <div className={styles.createTest}>

@@ -8,6 +8,7 @@ export interface QuestionDisplayProps {
     question: Question;
     /** Текущие ответы пользователя */
     answers: {
+        selectedOptionId?: number;
         selectedOptionIds?: number[];
         textAnswer?: string;
     };
@@ -30,7 +31,12 @@ const QuestionDisplay: React.FC<QuestionDisplayProps> = ({
     savingStatus,
     showDebugInfo = false,
 }) => {
-    const currentAnswers = answers.selectedOptionIds || [];
+    const currentAnswers =
+        question.type === "multiple_choice"
+            ? answers.selectedOptionIds || []
+            : answers.selectedOptionId
+              ? [answers.selectedOptionId]
+              : [];
     const correctAnswers = question.options?.filter((opt) => opt.isCorrect) || [];
     const correctAnswersCount = correctAnswers.length;
 
@@ -52,7 +58,7 @@ const QuestionDisplay: React.FC<QuestionDisplayProps> = ({
                             <div className={styles.debugInfo}>
                                 <strong>DEBUG INFO:</strong>
                                 <br />
-                                questionType = "{question.type}" <br />
+                                questionType = `&quot;{question.type}&quot;` <br />
                                 questionId = {question.id} <br />
                                 selectedAnswersCount = {currentAnswers.length} <br />
                                 correctAnswersCount = {correctAnswersCount} <br />
@@ -83,7 +89,20 @@ const QuestionDisplay: React.FC<QuestionDisplayProps> = ({
                                     }
                                     value={option.id}
                                     checked={currentAnswers.includes(option.id!)}
-                                    onChange={() => onAnswerChange(option.id)}
+                                    onChange={() => {
+                                        if (question.type === "multiple_choice") {
+                                            // Для множественного выбора
+                                            const newSelectedIds = currentAnswers.includes(
+                                                option.id!,
+                                            )
+                                                ? currentAnswers.filter((id) => id !== option.id!)
+                                                : [...currentAnswers, option.id!];
+                                            onAnswerChange(undefined, newSelectedIds);
+                                        } else {
+                                            // Для одиночного выбора
+                                            onAnswerChange(option.id, [option.id!]);
+                                        }
+                                    }}
                                 />
                                 <span className={styles.optionText}>{option.text}</span>
                             </label>
@@ -97,7 +116,7 @@ const QuestionDisplay: React.FC<QuestionDisplayProps> = ({
                     <div className={styles.errorInfo}>
                         <strong>⚠️ ПРОБЛЕМА: Варианты ответов не найдены!</strong>
                         <br />
-                        questionType = "{question.type}" <br />
+                        questionType = `&quot;{question.type}&quot;` <br />
                         hasOptions = {question.options ? "true" : "false"} <br />
                         optionsLength = {question.options?.length || 0} <br />
                         options = {JSON.stringify(question.options)}

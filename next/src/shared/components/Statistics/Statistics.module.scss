@@ -1,0 +1,139 @@
+.statisticsContainer {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 24px;
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 40px;
+    gap: 20px;
+}
+
+.headerContent {
+    flex: 1;
+    min-width: 0;
+}
+
+.title {
+    font-size: 32px;
+    font-weight: 700;
+    margin: 0 0 8px 0;
+    color: #1f2937;
+    background: linear-gradient(135deg, #1f2937 0%, #374151 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.subtitle {
+    font-size: 16px;
+    color: #6b7280;
+    margin: 0;
+    line-height: 1.5;
+}
+
+.headerActions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-shrink: 0;
+}
+
+.content {
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+    animation: fadeIn 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+// Responsive design
+@media (max-width: 768px) {
+    .statisticsContainer {
+        padding: 16px;
+    }
+    
+    .header {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 16px;
+        margin-bottom: 32px;
+    }
+    
+    .title {
+        font-size: 24px;
+    }
+    
+    .subtitle {
+        font-size: 14px;
+    }
+    
+    .headerActions {
+        justify-content: center;
+    }
+    
+    .content {
+        gap: 24px;
+    }
+}
+
+@media (max-width: 480px) {
+    .statisticsContainer {
+        padding: 12px;
+    }
+    
+    .header {
+        margin-bottom: 24px;
+    }
+    
+    .title {
+        font-size: 20px;
+    }
+    
+    .headerActions {
+        flex-direction: column;
+        gap: 8px;
+    }
+    
+    .content {
+        gap: 20px;
+    }
+}
+
+// Loading and error states
+.loadingContainer,
+.errorContainer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 400px;
+    text-align: center;
+    padding: 40px 20px;
+}
+
+.errorContainer {
+    background: linear-gradient(135deg, #fef2f2 0%, #fdf2f8 100%);
+    border: 1px solid #fecaca;
+    border-radius: 16px;
+    margin: 20px 0;
+}
+
+// Hover effects for interactive elements
+.headerActions button:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}

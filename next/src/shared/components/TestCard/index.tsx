@@ -11,18 +11,15 @@ interface TestCardProps {
     test: Test;
     showCreator?: boolean;
     className?: string;
+    onUpdate?: () => void;
 }
 
-const TestCard: React.FC<TestCardProps> = ({
-    test,
-    showCreator = false,
-    className,
-}) => {
+const TestCard: React.FC<TestCardProps> = ({ test, showCreator = false, className, onUpdate }) => {
     const router = useRouter();
     const { user } = useAuth();
 
     const handleViewTest = () => {
-        router.push(`/dashboard/tests/${test.id}`);
+        router.push(`/dashboard/tests/detail?id=${test.id}`);
     };
 
     return (
@@ -32,36 +29,22 @@ const TestCard: React.FC<TestCardProps> = ({
                     <h3 className={styles.testName}>{test.title}</h3>
                     <StatusBadge status={test.status} />
                 </div>
-                
-                {test.description && (
-                    <p className={styles.testDescription}>
-                        {test.description}
-                    </p>
-                )}
-                
+
+                {test.description && <p className={styles.testDescription}>{test.description}</p>}
+
                 <div className={styles.testMeta}>
-                    <span className={styles.metaItem}>
-                        📝 {test.questions.length} вопросов
-                    </span>
+                    <span className={styles.metaItem}>📝 {test.questions.length} вопросов</span>
                     {test.timeLimit && (
-                        <span className={styles.metaItem}>
-                            ⏱️ {test.timeLimit} мин
-                        </span>
+                        <span className={styles.metaItem}>⏱️ {test.timeLimit} мин</span>
                     )}
                     {showCreator && test.creator && user?.role && !isTeacher(user.role) && (
-                        <span className={styles.metaItem}>
-                            👨‍🏫 {test.creator.name}
-                        </span>
+                        <span className={styles.metaItem}>👨‍🏫 {test.creator.name}</span>
                     )}
                 </div>
             </div>
-            
+
             <div className={styles.testActions}>
-                <Button
-                    variant="outline"
-                    size="small"
-                    onClick={handleViewTest}
-                >
+                <Button variant="outline" size="small" onClick={handleViewTest}>
                     Подробнее
                 </Button>
             </div>

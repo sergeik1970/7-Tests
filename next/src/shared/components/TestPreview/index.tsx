@@ -10,12 +10,7 @@ interface TestPreviewProps {
     onStartTest: () => void;
 }
 
-const TestPreview: React.FC<TestPreviewProps> = ({
-    test,
-    isOwner,
-    isStarting,
-    onStartTest,
-}) => {
+const TestPreview: React.FC<TestPreviewProps> = ({ test, isOwner, isStarting, onStartTest }) => {
     return (
         <div className={styles.content}>
             <div className={styles.info}>
@@ -23,17 +18,17 @@ const TestPreview: React.FC<TestPreviewProps> = ({
                     <strong>Описание:</strong>
                     <p>{test.description || "Описание не указано"}</p>
                 </div>
-                
+
                 <div className={styles.infoItem}>
                     <strong>Время на прохождение:</strong>
                     <p>{test.timeLimit ? `${test.timeLimit} минут` : "Не ограничено"}</p>
                 </div>
-                
+
                 <div className={styles.infoItem}>
                     <strong>Количество вопросов:</strong>
                     <p>{test.questions.length}</p>
                 </div>
-                
+
                 {test.creator && (
                     <div className={styles.infoItem}>
                         <strong>Автор:</strong>
@@ -45,7 +40,7 @@ const TestPreview: React.FC<TestPreviewProps> = ({
             {isOwner && (
                 <div className={styles.questions}>
                     <h2 className={styles.sectionTitle}>Вопросы</h2>
-                    
+
                     {test.questions.length === 0 ? (
                         <div className={styles.emptyState}>
                             <p>В тесте пока нет вопросов</p>
@@ -55,25 +50,25 @@ const TestPreview: React.FC<TestPreviewProps> = ({
                             {test.questions.map((question, index) => (
                                 <div key={question.id || index} className={styles.questionCard}>
                                     <div className={styles.questionHeader}>
-                                        <h3 className={styles.questionTitle}>
-                                            Вопрос {index + 1}
-                                        </h3>
+                                        <h3 className={styles.questionTitle}>Вопрос {index + 1}</h3>
                                         <span className={styles.questionType}>
-                                            {question.type === 'multiple_choice' ? 'Выбор из вариантов' : 'Текстовый ответ'}
+                                            {question.type === "multiple_choice"
+                                                ? "Выбор из вариантов"
+                                                : "Текстовый ответ"}
                                         </span>
                                     </div>
-                                    
+
                                     <p className={styles.questionText}>{question.text}</p>
-                                    
-                                    {question.type === 'multiple_choice' && question.options && (
+
+                                    {question.type === "multiple_choice" && question.options && (
                                         <div className={styles.options}>
                                             {question.options.map((option, optionIndex) => (
-                                                <div 
-                                                    key={optionIndex} 
-                                                    className={`${styles.option} ${option.isCorrect ? styles.correctOption : ''}`}
+                                                <div
+                                                    key={optionIndex}
+                                                    className={`${styles.option} ${option.isCorrect ? styles.correctOption : ""}`}
                                                 >
                                                     <span className={styles.optionMarker}>
-                                                        {option.isCorrect ? '✓' : '○'}
+                                                        {option.isCorrect ? "✓" : "○"}
                                                     </span>
                                                     <span className={styles.optionText}>
                                                         {option.text}
@@ -82,26 +77,40 @@ const TestPreview: React.FC<TestPreviewProps> = ({
                                             ))}
                                         </div>
                                     )}
-                                    
-                                    {question.type === 'text_input' && question.correctTextAnswer && (
-                                        <div className={styles.textAnswer}>
-                                            <strong>Правильный ответ:</strong> {question.correctTextAnswer}
-                                        </div>
-                                    )}
+
+                                    {question.type === "text_input" &&
+                                        question.correctTextAnswer && (
+                                            <div className={styles.textAnswer}>
+                                                <strong>Правильный ответ:</strong>{" "}
+                                                {question.correctTextAnswer}
+                                            </div>
+                                        )}
                                 </div>
                             ))}
                         </div>
                     )}
                 </div>
             )}
-            
-            {!isOwner && test.status === 'active' && (
+
+            {!isOwner && test.status === "active" && (
                 <div className={styles.studentInfo}>
                     <div className={styles.infoCard}>
                         <h3>Готовы начать тест?</h3>
-                        <p>После начала теста у вас будет {test.timeLimit ? `${test.timeLimit} минут` : 'неограниченное время'} на прохождение.</p>
-                        <p>Тест содержит {test.questions.length} {test.questions.length === 1 ? 'вопрос' : test.questions.length < 5 ? 'вопроса' : 'вопросов'}.</p>
-                        
+                        <p>
+                            После начала теста у вас будет{" "}
+                            {test.timeLimit ? `${test.timeLimit} минут` : "неограниченное время"} на
+                            прохождение.
+                        </p>
+                        <p>
+                            Тест содержит {test.questions.length}{" "}
+                            {test.questions.length === 1
+                                ? "вопрос"
+                                : test.questions.length < 5
+                                  ? "вопроса"
+                                  : "вопросов"}
+                            .
+                        </p>
+
                         <div className={styles.startTestSection}>
                             <Button
                                 variant="primary"

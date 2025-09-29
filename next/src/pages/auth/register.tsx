@@ -6,6 +6,7 @@ import FormField from "@/shared/components/FormField";
 import AuthNavigation from "@/shared/components/AuthNavigation";
 import { useAuth } from "@/contexts/AuthContext";
 import styles from "./auth.module.scss";
+import Link from "next/link";
 
 const RegisterPage = () => {
     const [formData, setFormData] = useState({
@@ -13,7 +14,7 @@ const RegisterPage = () => {
         email: "",
         password: "",
         confirmPassword: "",
-        role: "pupil" as "pupil" | "teacher" | "student" | "professor"
+        role: "pupil" as "pupil" | "teacher" | "student" | "professor",
     });
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState("");
@@ -21,7 +22,7 @@ const RegisterPage = () => {
     const { register } = useAuth();
 
     const handleChange = (field: string, value: string) => {
-        setFormData(prev => ({ ...prev, [field]: value }));
+        setFormData((prev) => ({ ...prev, [field]: value }));
     };
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -52,11 +53,7 @@ const RegisterPage = () => {
                 </div>
 
                 <form onSubmit={handleSubmit} className={styles.form}>
-                    {error && (
-                        <div className={styles.error}>
-                            {error}
-                        </div>
-                    )}
+                    {error && <div className={styles.error}>{error}</div>}
 
                     <FormField
                         label="Имя"
@@ -84,7 +81,7 @@ const RegisterPage = () => {
                             { value: "pupil", label: "Ученик" },
                             { value: "teacher", label: "Учитель" },
                             { value: "student", label: "Студент" },
-                            { value: "professor", label: "Преподаватель" }
+                            { value: "professor", label: "Преподаватель" },
                         ]}
                         required
                     />
@@ -107,12 +104,7 @@ const RegisterPage = () => {
                         required
                     />
 
-                    <Button 
-                        variant="primary" 
-                        size="large" 
-                        type="submit"
-                        disabled={isLoading}
-                    >
+                    <Button variant="primary" size="large" type="submit" disabled={isLoading}>
                         {isLoading ? "Регистрация..." : "Зарегистрироваться"}
                     </Button>
                 </form>
@@ -120,9 +112,9 @@ const RegisterPage = () => {
                 <div className={styles.footer}>
                     <p>
                         Уже есть аккаунт?{" "}
-                        <a href="/auth/login" className={styles.link}>
+                        <Link href="/auth/login" className={styles.link}>
                             Войти
-                        </a>
+                        </Link>
                     </p>
                 </div>
             </div>

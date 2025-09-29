@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useRouter } from "next/router";
+import Link from "next/link";
 import Button from "@/shared/components/Button";
 import InputText from "@/shared/components/InputText";
 import FormField from "@/shared/components/FormField";
@@ -43,11 +44,7 @@ const LoginPage = () => {
                 </div>
 
                 <form onSubmit={handleSubmit} className={styles.form}>
-                    {error && (
-                        <div className={styles.error}>
-                            {error}
-                        </div>
-                    )}
+                    {error && <div className={styles.error}>{error}</div>}
 
                     <FormField
                         label="Email"
@@ -67,12 +64,7 @@ const LoginPage = () => {
                         required
                     />
 
-                    <Button 
-                        variant="primary" 
-                        size="large" 
-                        type="submit"
-                        disabled={isLoading}
-                    >
+                    <Button variant="primary" size="large" type="submit" disabled={isLoading}>
                         {isLoading ? "Вход..." : "Войти"}
                     </Button>
                 </form>
@@ -80,9 +72,9 @@ const LoginPage = () => {
                 <div className={styles.footer}>
                     <p>
                         Нет аккаунта?{" "}
-                        <a href="/auth/register" className={styles.link}>
+                        <Link href="/auth/register" className={styles.link}>
                             Зарегистрироваться
-                        </a>
+                        </Link>
                     </p>
                 </div>
             </div>

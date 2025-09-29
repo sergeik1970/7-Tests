@@ -3,6 +3,7 @@ import { useRouter } from "next/router";
 import { useAuth } from "@/contexts/AuthContext";
 import { isTeacher, getRoleDisplayName } from "@/shared/utils/roles";
 import styles from "./index.module.scss";
+import Link from "next/link";
 
 export interface MenuItem {
     icon: string;
@@ -62,9 +63,9 @@ const Sidebar = ({ className }: SidebarProps) => {
     return (
         <aside className={`${styles.sidebar} ${className || ""}`}>
             <div className={styles.logo}>
-                <a href="/" className={styles.logoLink}>
+                <Link href="/" className={styles.logoLink}>
                     <h2 className={styles.logoText}>Skorix</h2>
-                </a>
+                </Link>
             </div>
 
             <nav className={styles.nav}>

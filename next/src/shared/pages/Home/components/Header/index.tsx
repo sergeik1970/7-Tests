@@ -1,5 +1,6 @@
 import React, { ReactElement } from "react";
 import Button from "@/shared/components/Button";
+import Link from "next/link";
 import { useAuth } from "@/contexts/AuthContext";
 import { getRoleDisplayName } from "@/shared/utils/roles";
 import styles from "./index.module.scss";
@@ -15,25 +16,31 @@ const Header = (): ReactElement => {
         <header className={styles.header}>
             <div className={styles.container}>
                 <div className={styles.logo}>
-                    <a href={isAuthenticated ? "/dashboard" : "/"} className={styles.logoLink}>
+                    <Link href={isAuthenticated ? "/dashboard" : "/"} className={styles.logoLink}>
                         <h1 className={styles.logoText}>Skorix</h1>
-                    </a>
+                    </Link>
                 </div>
                 <nav className={styles.nav}>
                     <ul className={styles.navList}>
-                        <li><a href="#features" className={styles.navLink}>Возможности</a></li>
-                        <li><a href="#contact" className={styles.navLink}>Контакты</a></li>
+                        <li>
+                            <Link href="#features" className={styles.navLink}>
+                                Возможности
+                            </Link>
+                        </li>
+                        <li>
+                            <Link href="#contact" className={styles.navLink}>
+                                Контакты
+                            </Link>
+                        </li>
                     </ul>
                 </nav>
                 <div className={styles.authButtons}>
                     {isAuthenticated ? (
                         <div className={styles.userMenu}>
                             <div className={styles.userInfo}>
-                                <span className={styles.userName}>
-                                    Привет, {user?.name}!
-                                </span>
+                                <span className={styles.userName}>Привет, {user?.name}!</span>
                                 <span className={styles.userRole}>
-                                    {user?.role ? getRoleDisplayName(user.role) : 'Пользователь'}
+                                    {user?.role ? getRoleDisplayName(user.role) : "Пользователь"}
                                 </span>
                             </div>
                             <Button variant="outline" size="small" onClick={handleLogout}>
@@ -42,16 +49,16 @@ const Header = (): ReactElement => {
                         </div>
                     ) : (
                         <>
-                            <a href="/auth/login">
+                            <Link href="/auth/login">
                                 <Button variant="outline" size="small">
                                     Войти
                                 </Button>
-                            </a>
-                            <a href="/auth/register">
+                            </Link>
+                            <Link href="/auth/register">
                                 <Button variant="primary" size="small">
                                     Регистрация
                                 </Button>
-                            </a>
+                            </Link>
                         </>
                     )}
                 </div>

@@ -31,7 +31,7 @@ const FormField: React.FC<FormFieldProps> = ({
                 {label}
                 {required && <span className={styles.required}>*</span>}
             </label>
-            
+
             {type === "select" && options ? (
                 <select
                     value={value}
@@ -49,13 +49,13 @@ const FormField: React.FC<FormFieldProps> = ({
                 <InputText
                     type={type}
                     value={value}
-                    onChange={onChange}
+                    onChange={(e) => onChange(e.target.value)}
                     placeholder={placeholder}
                     required={required}
                     className={error ? styles.error : ""}
                 />
             )}
-            
+
             {error && <span className={styles.errorMessage}>{error}</span>}
         </div>
     );

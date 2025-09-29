@@ -19,14 +19,10 @@ const AuthNavigation: React.FC<AuthNavigationProps> = ({ currentPage }) => {
 
     return (
         <>
-            <button 
-                className={styles.burgerButton}
-                onClick={toggleMenu}
-                aria-label="Открыть меню"
-            >
-                <span className={`${styles.burgerLine} ${isMenuOpen ? styles.open : ''}`}></span>
-                <span className={`${styles.burgerLine} ${isMenuOpen ? styles.open : ''}`}></span>
-                <span className={`${styles.burgerLine} ${isMenuOpen ? styles.open : ''}`}></span>
+            <button className={styles.burgerButton} onClick={toggleMenu} aria-label="Открыть меню">
+                <span className={`${styles.burgerLine} ${isMenuOpen ? styles.open : ""}`}></span>
+                <span className={`${styles.burgerLine} ${isMenuOpen ? styles.open : ""}`}></span>
+                <span className={`${styles.burgerLine} ${isMenuOpen ? styles.open : ""}`}></span>
             </button>
 
             {isMenuOpen && (
@@ -36,7 +32,7 @@ const AuthNavigation: React.FC<AuthNavigationProps> = ({ currentPage }) => {
                             <Link href="/" className={styles.logo} onClick={closeMenu}>
                                 <span className={styles.logoText}>Skorix</span>
                             </Link>
-                            <button 
+                            <button
                                 className={styles.closeButton}
                                 onClick={closeMenu}
                                 aria-label="Закрыть меню"
@@ -44,20 +40,20 @@ const AuthNavigation: React.FC<AuthNavigationProps> = ({ currentPage }) => {
                                 ×
                             </button>
                         </div>
-                        
+
                         <div className={styles.menuContent}>
                             <div className={styles.authSection}>
                                 <h3 className={styles.sectionTitle}>Авторизация</h3>
-                                <Link 
-                                    href="/auth/login" 
+                                <Link
+                                    href="/auth/login"
                                     className={`${styles.menuLink} ${currentPage === "login" ? styles.active : ""}`}
                                     onClick={closeMenu}
                                 >
                                     <span className={styles.linkIcon}>🔑</span>
                                     Вход в систему
                                 </Link>
-                                <Link 
-                                    href="/auth/register" 
+                                <Link
+                                    href="/auth/register"
                                     className={`${styles.menuLink} ${currentPage === "register" ? styles.active : ""}`}
                                     onClick={closeMenu}
                                 >
@@ -68,11 +64,7 @@ const AuthNavigation: React.FC<AuthNavigationProps> = ({ currentPage }) => {
 
                             <div className={styles.navigationSection}>
                                 <h3 className={styles.sectionTitle}>Навигация</h3>
-                                <Link 
-                                    href="/" 
-                                    className={styles.menuLink}
-                                    onClick={closeMenu}
-                                >
+                                <Link href="/" className={styles.menuLink} onClick={closeMenu}>
                                     <span className={styles.linkIcon}>🏠</span>
                                     Главная страница
                                 </Link>
